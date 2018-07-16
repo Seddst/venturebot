@@ -73,7 +73,7 @@ def help(bot, update):
     update.message.reply_text("/list_triggers — show all triggers.")
 
 def ping(bot, update):
-    send_async(bot, chat_id=update.message.chat.id, text=MSG_PING.format(update.message.from_user.username))
+    send_async(bot, chat_id=update.message.chat.id, text='Go and dig some soulz, @{}!'.format(update.message.from_user.username))
     
 
 def echo(bot, update):
@@ -88,11 +88,11 @@ def add_trigger(bot, update, session):
         if trigger is None:
             data = update.message.reply_to_message
             add_trigger_db(data, update.message.chat, trigger_text, session)
-            send_async(bot, chat_id=update.message.chat.id, text=MSG_TRIGGER_NEW.format(trigger_text))
+            send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger_text))
         else:
-            send_async(bot, chat_id=update.message.chat.id, text=MSG_TRIGGER_EXISTS.format(trigger_text))
+            send_async(bot, chat_id=update.message.chat.id, text='Trigger "{}" already exists, select another one.'.format(trigger_text))
     else:
-        send_async(bot, chat_id=update.message.chat.id, text=MSG_TRIGGER_NEW_ERROR)
+        send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
         
  
 def set_trigger(bot, update, session):
@@ -101,9 +101,9 @@ def set_trigger(bot, update, session):
         trigger = msg[1].strip()
         data = update.message.reply_to_message
         add_trigger_db(data, update.message.chat, trigger, session)
-        send_async(bot, chat_id=update.message.chat.id, text=MSG_TRIGGER_NEW.format(trigger))
+        send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger))
     else:
-        send_async(bot, chat_id=update.message.chat.id, text=MSG_TRIGGER_NEW_ERROR)
+        send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
         
  def del_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
@@ -111,16 +111,16 @@ def set_trigger(bot, update, session):
     if trigger is not None:
         session.delete(trigger)
         session.commit()
-        send_async(bot, chat_id=update.message.chat.id, text=MSG_TRIGGER_DEL.format(msg))
+        send_async(bot, chat_id=update.message.chat.id, text='The trigger for "{}" has been deleted.'.format(msg))
     else:
-        send_async(bot, chat_id=update.message.chat.id, text=MSG_TRIGGER_DEL_ERROR)
+        send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
         
 def list_triggers(bot, update, session):
     triggers = session.query(Trigger).all()
     local_triggers = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
-    msg = MSG_TRIGGER_LIST_HEADER + \
-          MSG_TRIGGER_GLOBAL + ('\n'.join([trigger.trigger for trigger in triggers]) or MSG_EMPTY) + \
-          MSG_TRIGGER_LOCAL + ('\n'.join([trigger.trigger for trigger in local_triggers]) or MSG_EMPTY)
+    msg = 'List of current triggers: \n' + \
+          '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
+          '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
     send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
     
 def set_welcome(bot, update, session):
@@ -133,7 +133,7 @@ def set_welcome(bot, update, session):
             welcome_msg.message = update.message.text.split(' ', 1)[1]
         session.add(welcome_msg)
         session.commit()
-        send_async(bot, chat_id=update.message.chat.id, text=MSG_WELCOME_SET)
+        send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
       
 def enable_welcome(bot: Bot, update: Update, session):
     if update.message.chat.type in ['group']:
@@ -141,7 +141,7 @@ def enable_welcome(bot: Bot, update: Update, session):
         group.welcome_enabled = True
         session.add(group)
         session.commit()
-        send_async(bot, chat_id=update.message.chat.id, text=MSG_WELCOME_ENABLED)        
+        send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')        
 
 def disable_welcome(bot: Bot, update: Update, session):
     if update.message.chat.type in ['group']:
@@ -149,21 +149,160 @@ def disable_welcome(bot: Bot, update: Update, session):
         group.welcome_enabled = False
         session.add(group)
         session.commit()
-        send_async(bot, chat_id=update.message.chat.id, text=MSG_WELCOME_DISABLED)  
+        send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')  
         
 def show_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
         if welcome_msg is None:
-            welcome_msg = WelcomeMsg(chat_id=group.id, message=MSG_WELCOME_DEFAULT)
+            welcome_msg = WelcomeMsg(chat_id=group.id, message='Hi, %username%!')
             session.add(welcome_msg)
             session.commit()
         send_async(bot, chat_id=group.id, text=welcome_msg.message) 
+
         
+@admin_allowed()
+def set_admin(bot, update, session):
+    msg = update.message.text.split(' ', 1)[1]
+    msg = msg.replace('@', '')
+    if msg != '':
+        user = session.query(User).filter_by(username=msg).first()
+        if user is None:
+            send_async(bot,
+                       chat_id=update.message.chat.id,
+                       text='No such user')
+
+        else:
+            adm = session.query(Admin).filter_by(user_id=user.id,
+                                                 admin_group=update.message.chat.id).first()
+
+            if adm is None:
+                new_group_admin = Admin(user_id=user.id,
+                                        admin_type=AdminType.GROUP.value,
+                                        admin_group=update.message.chat.id)
+
+                session.add(new_group_admin)
+                session.commit()
+                send_async(bot,
+                           chat_id=update.message.chat.id,
+                           text="""Welcome our new administrator: @{}!
+Check the commands list with /help command""".format(user.username))
+
+            else:
+                send_async(bot,
+                           chat_id=update.message.chat.id,
+                           text='@{} already has administrator rights'.format(user.username))  
+                
+@admin_allowed()
+def del_admin(bot, update, session):
+    msg = update.message.text.split(' ', 1)[1]
+    if msg.find('@') != -1:
+        msg = msg.replace('@', '')
+        if msg != '':
+            user = session.query(User).filter_by(username=msg).first()
+            if user is None:
+                send_async(bot,
+                           chat_id=update.message.chat.id,
+                           text='No such user')
+
+            else:
+                del_adm(bot, update.message.chat.id, user, session)
+    else:
+        user = session.query(User).filter_by(id=msg).first()
+        if user is None:
+            send_async(bot,
+                       chat_id=update.message.chat.id,
+                       text='No such user')
+
+        else:
+            del_adm(bot, update.message.chat.id, user, session)
+
+def del_adm(bot, chat_id, user, session):
+    adm = session.query(Admin).filter_by(user_id=user.id,
+                                         admin_group=chat_id).first()
+
+    if adm is None:
+        send_async(bot,
+                   chat_id=chat_id,
+                   text='@{} never had any power here!'.format(user.username))
+
+    else:
+        session.delete(adm)
+        session.commit()
+        send_async(bot,
+                   chat_id=chat_id,
+                   text='@{}, now you have no power here!'.format(user.username))            
+            
+            
+            
+@admin_allowed()
+def list_admins(bot, update, session):
+    admins = session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
+    users = []
+    for admin_user in admins:
+        users.append(session.query(User).filter_by(id=admin_user.user_id).first())
+    msg = 'Administrators list:\n'
+    for user in users:
+        msg += '{} @{} {} {}\n'.format(user.id,
+                                             user.username,
+                                             user.first_name,
+                                             user.last_name)
+
+    send_async(bot, chat_id=update.message.chat.id, text=msg)  
+
+@admin_allowed()
+def ban(bot, update, session):
+    username, reason = update.message.text.split(' ', 2)[1:]
+    username = username.replace('@', '')
+    user = session.query(User).filter_by(username=username).first()
+    if user:
+        banned = session.query(Ban).filter_by(user_id=user.id).first()
+        if banned:
+            send_async(bot, chat_id=update.message.chat.id,
+                       text='This user is already banned. The reason is: {2}.'.format(banned.to_date, banned.reason))
+        else:
+            banned = Ban()
+            banned.user_id = user.id
+            banned.from_date = datetime.now()
+            banned.to_date = datetime.max
+            banned.reason = reason or 'Reason not specified'
+            member = session.query().filter_by(user_id=user.id).first()
+            if member:
+                session.delete(member)
+            admins = session.query(Admin).filter_by(user_id=user.id).all()
+            for admin in admins:
+                session.delete(admin)
+            session.add(banned)
+            session.commit()
+            send_async(bot, chat_id=user.id, text='You were banned because: {}'.format(banned.reason))
+            send_async(bot, chat_id=update.message.chat.id, text='Soldier successfully banned')
+    else:
+        send_async(bot, chat_id=update.message.chat.id, text='No such user')
+        
+    
+@admin_allowed()
+def unban(bot, update, session):
+    username = update.message.text.split(' ', 1)[1]
+    username = username.replace('@', '')
+    user = session.query(User).filter_by(username=username).first()
+    if user:
+        banned = session.query(Ban).filter_by(user_id=user.id).first()
+        if banned:
+            session.delete(banned)
+            session.commit()
+            send_async(bot, chat_id=user.id, text='We can talk again 🌚')
+            send_async(bot, chat_id=update.message.chat.id, text='{} is no longer banned.'.format('@' + user.username))
+        else:
+            send_async(bot, chat_id=update.message.chat.id, text='This soldier is not banned')
+    else:
+        send_async(bot, chat_id=update.message.chat.id, text='No such user')        
+   
+  
 def error(bot, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
+ 
     
 @admin_allowed()
 def kick(bot: Bot, update: Update):
@@ -181,22 +320,22 @@ def main():
     dp.add_handler(CommandHandler("start", start))
     dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("help", help_msg))
-    disp.add_handler(CommandHandler("ping", ping))
-    disp.add_handler(CommandHandler("set_trigger", set_trigger))
-    disp.add_handler(CommandHandler("add_trigger", add_trigger))
-    disp.add_handler(CommandHandler("del_trigger", del_trigger))
-    disp.add_handler(CommandHandler("list_triggers", list_triggers))
-    disp.add_handler(CommandHandler("set_welcome", set_welcome))
-    disp.add_handler(CommandHandler("enable_welcome", enable_welcome))
-    disp.add_handler(CommandHandler("disable_welcome", disable_welcome))
-    disp.add_handler(CommandHandler("show_welcome", show_welcome))
-    disp.add_handler(CommandHandler("add_admin", set_admin))
-    disp.add_handler(CommandHandler("del_admin", del_admin))
-    disp.add_handler(CommandHandler("list_admins", list_admins))
-    disp.add_handler(CommandHandler("kick", kick))
+    dp.add_handler(CommandHandler("ping", ping))
+    dp.add_handler(CommandHandler("set_trigger", set_trigger))
+    dp.add_handler(CommandHandler("add_trigger", add_trigger))
+    dp.add_handler(CommandHandler("del_trigger", del_trigger))
+    dp.add_handler(CommandHandler("list_triggers", list_triggers))
+    dp.add_handler(CommandHandler("set_welcome", set_welcome))
+    dp.add_handler(CommandHandler("enable_welcome", enable_welcome))
+    dp.add_handler(CommandHandler("disable_welcome", disable_welcome))
+    dp.add_handler(CommandHandler("show_welcome", show_welcome))
+    dp.add_handler(CommandHandler("add_admin", set_admin))
+    dp.add_handler(CommandHandler("del_admin", del_admin))
+    dp.add_handler(CommandHandler("list_admins", list_admins))
+    dp.add_handler(CommandHandler("kick", kick))
     
-    disp.add_handler(CommandHandler("ban", ban))
-    disp.add_handler(CommandHandler("unban", unban))    
+    dp.add_handler(CommandHandler("ban", ban))
+    dp.add_handler(CommandHandler("unban", unban))    
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
 
