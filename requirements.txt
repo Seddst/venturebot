@@ -4,3 +4,4 @@ requests
 Flask
 ujson
 pandas
+enum34
