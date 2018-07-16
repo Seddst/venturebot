@@ -12,10 +12,13 @@ Basic Echobot example, repeats messages.
 Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
-
+from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
-
+from types import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, admin_allowed
+from config import TOKEN
+from utils import send_async, update_group
+from telegram import Update, Bot, Message, ParseMode
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -25,14 +28,15 @@ logger = logging.getLogger(__name__)
 
 # Define a few command handlers. These usually take the two arguments bot and
 # update. Error handlers also receive the raised TelegramError object in error.
-def start(bot, update):
+def start(update):
     """Send a message when the command /start is issued."""
     update.message.reply_text('Greetings, soldier! I am the Soul Bot of 🥔Nomadic Entrepreneurs!  \
                     ' '')
-    
-def admin_panel(bot, update):
-   if update.message.chat.type == ['private']:
-     update.message.reply_text("""Welcome commands:
+
+
+def admin_panel(update):
+    if update.message.chat.type == ['private']:
+        update.message.reply_text("""Welcome commands:
 /enable_welcome — enable welcome message.
 /disable_welcome — disable welcome message.
 /set_welcome <text> — set welcome message. \
@@ -66,19 +70,22 @@ Reply any message with Pin to Pin it (admins always can do that, other members i
 Reply any message with Pin and notify to pin and send notificaion
 Reply any message with Delete to delete it 
 """)
-    
 
-def help(bot, update):
+
+def help_msg(update):
     """Send a message when the command /help is issued."""
     update.message.reply_text("/list_triggers — show all triggers.")
 
-def ping(bot, update):
-    send_async(bot, chat_id=update.message.chat.id, text='Go and dig some soulz, @{}!'.format(update.message.from_user.username))
-    
 
-def echo(bot, update):
+def ping(bot, update):
+    send_async(bot, chat_id=update.message.chat.id,
+               text='Go and dig some soulz, @{}!'.format(update.message.from_user.username))
+
+
+def echo(update: Update):
     """Echo the user message."""
     update.message.reply_text(update.message.text)
+
 
 def add_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)
@@ -88,13 +95,15 @@ def add_trigger(bot, update, session):
         if trigger is None:
             data = update.message.reply_to_message
             add_trigger_db(data, update.message.chat, trigger_text, session)
-            send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger_text))
+            send_async(bot, chat_id=update.message.chat.id,
+                       text='The trigger for the phrase "{}" is set.'.format(trigger_text))
         else:
-            send_async(bot, chat_id=update.message.chat.id, text='Trigger "{}" already exists, select another one.'.format(trigger_text))
+            send_async(bot, chat_id=update.message.chat.id,
+                       text='Trigger "{}" already exists, select another one.'.format(trigger_text))
     else:
         send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
-        
- 
+
+
 def set_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
@@ -104,8 +113,9 @@ def set_trigger(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger))
     else:
         send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
-        
- def del_trigger(bot, update, session):
+
+
+def del_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     trigger = session.query(LocalTrigger).filter_by(trigger=msg).first()
     if trigger is not None:
@@ -114,7 +124,8 @@ def set_trigger(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='The trigger for "{}" has been deleted.'.format(msg))
     else:
         send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
-        
+
+
 def list_triggers(bot, update, session):
     triggers = session.query(Trigger).all()
     local_triggers = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
@@ -122,7 +133,48 @@ def list_triggers(bot, update, session):
           '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
           '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
     send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
-    
+
+
+def add_trigger_db(msg: Message, chat, trigger_text: str, session):
+    trigger = session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
+    if trigger is None:
+        trigger = LocalTrigger()
+        trigger.chat_id = chat.id
+        trigger.trigger = trigger_text
+    if msg.audio:
+        trigger.message = msg.audio.file_id
+        trigger.message_type = MessageType.AUDIO.value
+    elif msg.document:
+        trigger.message = msg.document.file_id
+        trigger.message_type = MessageType.DOCUMENT.value
+    elif msg.voice:
+        trigger.message = msg.voice.file_id
+        trigger.message_type = MessageType.VOICE.value
+    elif msg.sticker:
+        trigger.message = msg.sticker.file_id
+        trigger.message_type = MessageType.STICKER.value
+    elif msg.contact:
+        trigger.message = str(msg.contact)
+        trigger.message_type = MessageType.CONTACT.value
+    elif msg.video:
+        trigger.message = msg.video.file_id
+        trigger.message_type = MessageType.VIDEO.value
+    elif msg.video_note:
+        trigger.message = msg.video_note.file_id
+        trigger.message_type = MessageType.VIDEO_NOTE.value
+    elif msg.location:
+        trigger.message = str(msg.location)
+        trigger.message_type = MessageType.LOCATION.value
+    elif msg.photo:
+        trigger.message = msg.photo[-1].file_id
+        trigger.message_type = MessageType.PHOTO.value
+    else:
+        trigger.message = msg.text
+        trigger.message_type = MessageType.TEXT.value
+    session.add(trigger)
+    session.commit()
+
+
 def set_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
@@ -134,23 +186,26 @@ def set_welcome(bot, update, session):
         session.add(welcome_msg)
         session.commit()
         send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
-      
-def enable_welcome(bot: Bot, update: Update, session):
+
+
+def enable_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         group.welcome_enabled = True
         session.add(group)
         session.commit()
-        send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')        
+        send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
-def disable_welcome(bot: Bot, update: Update, session):
+
+def disable_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         group.welcome_enabled = False
         session.add(group)
         session.commit()
-        send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')  
-        
+        send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
+
+
 def show_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
@@ -159,9 +214,9 @@ def show_welcome(bot, update, session):
             welcome_msg = WelcomeMsg(chat_id=group.id, message='Hi, %username%!')
             session.add(welcome_msg)
             session.commit()
-        send_async(bot, chat_id=group.id, text=welcome_msg.message) 
+        send_async(bot, chat_id=group.id, text=welcome_msg.message)
 
-        
+
 @admin_allowed()
 def set_admin(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
@@ -192,8 +247,9 @@ Check the commands list with /help command""".format(user.username))
             else:
                 send_async(bot,
                            chat_id=update.message.chat.id,
-                           text='@{} already has administrator rights'.format(user.username))  
-                
+                           text='@{} already has administrator rights'.format(user.username))
+
+
 @admin_allowed()
 def del_admin(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
@@ -218,6 +274,7 @@ def del_admin(bot, update, session):
         else:
             del_adm(bot, update.message.chat.id, user, session)
 
+
 def del_adm(bot, chat_id, user, session):
     adm = session.query(Admin).filter_by(user_id=user.id,
                                          admin_group=chat_id).first()
@@ -232,10 +289,9 @@ def del_adm(bot, chat_id, user, session):
         session.commit()
         send_async(bot,
                    chat_id=chat_id,
-                   text='@{}, now you have no power here!'.format(user.username))            
-            
-            
-            
+                   text='@{}, now you have no power here!'.format(user.username))
+
+
 @admin_allowed()
 def list_admins(bot, update, session):
     admins = session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
@@ -245,14 +301,15 @@ def list_admins(bot, update, session):
     msg = 'Administrators list:\n'
     for user in users:
         msg += '{} @{} {} {}\n'.format(user.id,
-                                             user.username,
-                                             user.first_name,
-                                             user.last_name)
+                                       user.username,
+                                       user.first_name,
+                                       user.last_name)
 
-    send_async(bot, chat_id=update.message.chat.id, text=msg)  
+    send_async(bot, chat_id=update.message.chat.id, text=msg)
+
 
 @admin_allowed()
-def ban(bot, update, session):
+def ban(bot: Bot, update: Update, session):
     username, reason = update.message.text.split(' ', 2)[1:]
     username = username.replace('@', '')
     user = session.query(User).filter_by(username=username).first()
@@ -260,7 +317,7 @@ def ban(bot, update, session):
         banned = session.query(Ban).filter_by(user_id=user.id).first()
         if banned:
             send_async(bot, chat_id=update.message.chat.id,
-                       text='This user is already banned. The reason is: {2}.'.format(banned.to_date, banned.reason))
+                       text='This user is already banned. The reason is: .'.format(banned.to_date, banned.reason))
         else:
             banned = Ban()
             banned.user_id = user.id
@@ -279,8 +336,8 @@ def ban(bot, update, session):
             send_async(bot, chat_id=update.message.chat.id, text='Soldier successfully banned')
     else:
         send_async(bot, chat_id=update.message.chat.id, text='No such user')
-        
-    
+
+
 @admin_allowed()
 def unban(bot, update, session):
     username = update.message.text.split(' ', 1)[1]
@@ -296,29 +353,29 @@ def unban(bot, update, session):
         else:
             send_async(bot, chat_id=update.message.chat.id, text='This soldier is not banned')
     else:
-        send_async(bot, chat_id=update.message.chat.id, text='No such user')        
-   
-  
-def error(bot, update, error):
+        send_async(bot, chat_id=update.message.chat.id, text='No such user')
+
+
+def error(update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
- 
-    
+
+
 @admin_allowed()
-def kick(bot: Bot, update: Update):
+def kick(bot, update):
     bot.leave_chat(update.message.chat.id)
+
 
 def main():
     """Start the bot."""
     # Create the EventHandler and pass it your bot's token.
-    updater = Updater('618668131:AAG57FawPhzS5FEBsyGRsSZ1aIxbh871Ei0')
+    updater = Updater(TOKEN)
 
     # Get the dispatcher to register handlers
     dp = updater.dispatcher
 
     # on different commands - answer in Telegram
     dp.add_handler(CommandHandler("start", start))
-    dp.add_handler(CommandHandler("help", help))
     dp.add_handler(CommandHandler("help", help_msg))
     dp.add_handler(CommandHandler("ping", ping))
     dp.add_handler(CommandHandler("set_trigger", set_trigger))
@@ -333,9 +390,9 @@ def main():
     dp.add_handler(CommandHandler("del_admin", del_admin))
     dp.add_handler(CommandHandler("list_admins", list_admins))
     dp.add_handler(CommandHandler("kick", kick))
-    
+
     dp.add_handler(CommandHandler("ban", ban))
-    dp.add_handler(CommandHandler("unban", unban))    
+    dp.add_handler(CommandHandler("unban", unban))
     # on noncommand i.e message - echo the message on Telegram
     dp.add_handler(MessageHandler(Filters.text, echo))
 
