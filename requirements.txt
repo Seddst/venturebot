@@ -2,3 +2,4 @@ python-telegram-bot
 SQLAlchemy==1.2.10
 requests
 Flask
+ujson
