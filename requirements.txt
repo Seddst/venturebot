@@ -1,2 +1,1 @@
 python-telegram-bot
-python-3.6.6
