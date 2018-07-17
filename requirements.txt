@@ -1,4 +1,5 @@
 python-telegram-bot
+PyMySQL
 SQLAlchemy==1.2.10
 requests
 Flask
