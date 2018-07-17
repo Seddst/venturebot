@@ -15,7 +15,7 @@ bot.
 from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
-from types import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, admin_allowed
+from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, admin_allowed
 from config import TOKEN
 from utils import send_async, update_group
 from telegram import Update, Bot, Message, ParseMode
