@@ -1,7 +1,7 @@
 from telegram import Bot
 from telegram.error import TelegramError
 from telegram.ext.dispatcher import run_async
-from types import Session, Group
+from typing import Session, Group
 
 
 @run_async
