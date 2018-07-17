@@ -1,6 +1,11 @@
 python-telegram-bot
 PyMySQL
 SQLAlchemy==1.2.10
+psycopg2 = "*"
+django = "*"
+gunicorn = "*"
+whitenoise = "*
+dj-database-url = "*"
 requests
 Flask
 ujson
