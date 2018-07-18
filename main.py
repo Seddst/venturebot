@@ -34,7 +34,7 @@ def start(self, update):
                     ' '')
 
 
-def admin_panel(update):
+def admin_panel(self, update):
     if update.message.chat.type == ['private']:
         update.message.reply_text("""Welcome commands:
 /enable_welcome — enable welcome message.
@@ -72,22 +72,22 @@ Reply any message with Delete to delete it
 """)
 
 
-def help_msg(update):
+def help_msg(self, update):
     """Send a message when the command /help is issued."""
     update.message.reply_text("/list_triggers — show all triggers.")
 
 
-def ping(bot, update):
+def ping(self, bot, update):
     send_async(bot, chat_id=update.message.chat.id,
                text='Go and dig some soulz, @{}!'.format(update.message.from_user.username))
 
 
-def echo(update: Update):
+def echo(self, update: Update):
     """Echo the user message."""
     update.message.reply_text(update.message.text)
 
 
-def add_trigger(bot, update, session):
+def add_trigger(self, bot, update, session):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
         trigger_text = msg[1].strip()
@@ -104,7 +104,7 @@ def add_trigger(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
 
-def set_trigger(bot, update, session):
+def set_trigger(self, bot, update, session):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
         trigger = msg[1].strip()
@@ -115,7 +115,7 @@ def set_trigger(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
 
-def del_trigger(bot, update, session):
+def del_trigger(self, bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     trigger = session.query(LocalTrigger).filter_by(trigger=msg).first()
     if trigger is not None:
@@ -126,7 +126,7 @@ def del_trigger(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
 
 
-def list_triggers(bot, update, session):
+def list_triggers(self, bot, update, session):
     triggers = session.query(Trigger).all()
     local_triggers = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
     msg = 'List of current triggers: \n' + \
@@ -135,7 +135,7 @@ def list_triggers(bot, update, session):
     send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
 
 
-def add_trigger_db(msg: Message, chat, trigger_text: str, session):
+def add_trigger_db(self, msg: Message, chat, trigger_text: str, session):
     trigger = session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
     if trigger is None:
         trigger = LocalTrigger()
@@ -175,7 +175,7 @@ def add_trigger_db(msg: Message, chat, trigger_text: str, session):
     session.commit()
 
 
-def set_welcome(bot, update, session):
+def set_welcome(self, bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
@@ -188,7 +188,7 @@ def set_welcome(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
 
 
-def enable_welcome(bot, update, session):
+def enable_welcome(self, bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         group.welcome_enabled = True
@@ -197,7 +197,7 @@ def enable_welcome(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
 
-def disable_welcome(bot, update, session):
+def disable_welcome(self, bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         group.welcome_enabled = False
@@ -206,7 +206,7 @@ def disable_welcome(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
 
 
-def show_welcome(bot, update, session):
+def show_welcome(self, bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
@@ -218,7 +218,7 @@ def show_welcome(bot, update, session):
 
 
 @admin_allowed()
-def set_admin(bot, update, session):
+def set_admin(self, bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     msg = msg.replace('@', '')
     if msg != '':
@@ -251,7 +251,7 @@ Check the commands list with /help command""".format(user.username))
 
 
 @admin_allowed()
-def del_admin(bot, update, session):
+def del_admin(self, bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     if msg.find('@') != -1:
         msg = msg.replace('@', '')
@@ -293,7 +293,7 @@ def del_adm(bot, chat_id, user, session):
 
 
 @admin_allowed()
-def list_admins(bot, update, session):
+def list_admins(self, bot, update, session):
     admins = session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
     users = []
     for admin_user in admins:
@@ -309,7 +309,7 @@ def list_admins(bot, update, session):
 
 
 @admin_allowed()
-def ban(bot: Bot, update: Update, session):
+def ban(self, bot: Bot, update: Update, session):
     username, reason = update.message.text.split(' ', 2)[1:]
     username = username.replace('@', '')
     user = session.query(User).filter_by(username=username).first()
@@ -339,7 +339,7 @@ def ban(bot: Bot, update: Update, session):
 
 
 @admin_allowed()
-def unban(bot, update, session):
+def unban(self, bot, update, session):
     username = update.message.text.split(' ', 1)[1]
     username = username.replace('@', '')
     user = session.query(User).filter_by(username=username).first()
@@ -356,13 +356,13 @@ def unban(bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='No such user')
 
 
-def error(update, error):
+def error(self, update, error):
     """Log Errors caused by Updates."""
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
 @admin_allowed()
-def kick(bot, update):
+def kick(self, bot, update):
     bot.leave_chat(update.message.chat.id)
 
 
