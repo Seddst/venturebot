@@ -5,7 +5,7 @@ from typing import Session, Group
 
 
 @run_async
-def send_async(bot: Bot, *args, **kwargs):
+def send_async(self, bot: Bot, *args, **kwargs):
     try:
         return bot.sendMessage(*args, **kwargs)
 
@@ -20,7 +20,7 @@ def send_async(bot: Bot, *args, **kwargs):
         return None
 
 
-def update_group(grp, session):
+def update_group(self, grp, session):
     if grp.type in ['group', 'supergroup' 'channel']:
         group = session.query(Group).filter_by(id=grp.id).first()
         if group is None:
