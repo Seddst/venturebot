@@ -15,7 +15,7 @@ bot.
 from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
-from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, admin_allowed
+from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, admin_allowed, user_allowed, check_admin
 from config import TOKEN
 from utils import send_async, update_group
 from telegram import Update, Bot, Message, ParseMode
@@ -84,7 +84,33 @@ def ping(bot: Bot, update: Update):
 def echo(self, update: Update):
     """Echo the user message."""
     update.message.reply_text(update.message.text)
-
+    
+    
+def trigger_decorator(func):
+    @user_allowed
+    def wrapper(bot, update, session, *args, **kwargs):
+        group = update_group(update.message.chat, session)
+        if group is None and \
+                check_admin(update, session, AdminType.FULL) or \
+                group is not None and \
+                (group.allow_trigger_all or
+                 check_admin(update, session, AdminType.GROUP)):
+            func(bot, update, session, *args, **kwargs)
+    return wrapper
+  
+    
+def trigger_decorator(func):
+    @user_allowed
+    def wrapper(bot, update, session, *args, **kwargs):
+        group = update_group(update.message.chat, session)
+        if group is None and \
+                check_admin(update, session, AdminType.FULL) or \
+                group is not None and \
+                (group.allow_trigger_all or
+                 check_admin(update, session, AdminType.GROUP)):
+            func(bot, update, session, *args, **kwargs)
+    return wrapper   
+  
 
 def add_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)
@@ -124,8 +150,9 @@ def del_trigger(bot, update, session):
     else:
         send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
 
-
-def list_triggers(update: Update, session, bot: Bot):
+        
+@trigger_decorator
+def list_triggers(bot: Bot, update: Update, session):
     triggers = session.query(Trigger).all()
     local_triggers = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
     msg = 'List of current triggers: \n' + \
