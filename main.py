@@ -77,9 +77,9 @@ def help_msg(self, update):
     update.message.reply_text("/list_triggers — show all triggers.")
 
 
-def ping(self, bot, update):
-    send_async(self, bot, update.message.chat.id,
-               update.message.reply_text('Go and dig some soulz, @{}!'.format(update.message.from_user.username)))
+def ping(self, bot: Bot, update: Update):
+    send_async(self, bot, update, chat_id=update.message.chat.id,
+               text=message('Go and dig some soulz, @{}!'))
 
 
 def echo(self, update: Update):
