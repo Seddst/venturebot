@@ -220,3 +220,13 @@ def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
         return wrapper
 
     return decorate
+
+def user_allowed(ban_enable=True):
+    if callable(ban_enable):
+        return admin_allowed(AdminType.NOT_ADMIN)(ban_enable)
+    else:
+        def wrap(func):
+            return admin_allowed(AdminType.NOT_ADMIN, ban_enable)(func)
+    return wrap
+
+Base.metadata.create_all(ENGINE)
