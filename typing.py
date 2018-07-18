@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import (
     create_engine,
-    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, Text, VARCHAR
+    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, Text, VARCHAR, DateTime
 )
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
