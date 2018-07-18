@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import (
     create_engine,
-    Column, Integer, DateTime, Boolean, ForeignKey, BigInteger, Text, VARCHAR
+    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, Text, VARCHAR
 )
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
@@ -136,8 +136,8 @@ class Ban(Base):
 
     user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
     reason = Column(VARCHAR(2500))
-    from_date = Column(DATETIME(fsp=6))
-    to_date = Column(DATETIME(fsp=6))
+    from_date = Column(TIMESTAMP)
+    to_date = Column(TIMESTAMP)
 
 
 class Log(Base):
@@ -146,7 +146,7 @@ class Log(Base):
     id = Column(BigInteger, autoincrement=True, primary_key=True)
     user_id = Column(BigInteger, ForeignKey(User.id))
     chat_id = Column(BigInteger)
-    date = Column(DATETIME(fsp=6))
+    date = Column(TIMESTAMP)
     func_name = Column(VARCHAR(2500))
     args = Column(VARCHAR(2500))
 
