@@ -48,6 +48,7 @@ ENGINE = create_engine(DB,
 LOGGER = logging.getLogger('sqlalchemy.engine')
 Base = declarative_base()
 Session = scoped_session(sessionmaker(bind=ENGINE))
+session = Session()
 
 
 class Group(Base):
