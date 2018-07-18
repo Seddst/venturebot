@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import (
     create_engine,
-    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, Text, VARCHAR, DateTime
+    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, text, VARCHAR, DateTime
 )
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
@@ -154,7 +154,7 @@ class Log(Base):
 class Auth(Base):
     __tablename__ = 'auth'
 
-    id = Column(Text(length=32))
+    id = Column(text(length=32))
     user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
 
 
