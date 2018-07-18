@@ -154,7 +154,7 @@ class Log(Base):
 class Auth(Base):
     __tablename__ = 'auth'
 
-    id = Column(text)
+    id = Column(TIMESTAMP)
     user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
 
 
