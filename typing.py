@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import (
     create_engine,
-    Column, Integer, DateTime, Boolean, ForeignKey, UnicodeText, BigInteger, Text
+    Column, Integer, DateTime, Boolean, ForeignKey, UnicodeText, BigInteger, Text, VARCHAR
 )
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
@@ -54,8 +54,8 @@ class Group(Base):
     __tablename__ = 'groups'
 
     id = Column(BigInteger, primary_key=True)  # FIX: invalid name
-    username = Column(UnicodeText(250))
-    title = Column(UnicodeText(250))
+    username = Column(VARCHAR(250))
+    title = Column(VARCHAR(250))
     welcome_enabled = Column(Boolean, default=True)  # if errors change back to default of false
     allow_trigger_all = Column(Boolean, default=False)
     allow_pin_all = Column(Boolean, default=False)
@@ -66,9 +66,9 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(BigInteger, primary_key=True)
-    username = Column(UnicodeText(250))
-    first_name = Column(UnicodeText(250))
-    last_name = Column(UnicodeText(250))
+    username = Column(VARCHAR(250))
+    first_name = Column(VARCHAR(250))
+    last_name = Column(VARCHAR(250))
     date_added = Column(DateTime, default=datetime.now())
 
     def __repr__(self):
