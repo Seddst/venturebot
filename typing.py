@@ -164,7 +164,7 @@ def check_admin(self, update, session, adm_type, allowed_types=()):
     if adm_type == AdminType.NOT_ADMIN:
         allowed = True
     else:
-        admins = session.query(Admin).filter_by(user_id=update.message.from_user.id).all()
+        admins = DB.session.query(Admin).filter_by(user_id=update.message.from_user.id).all()
         for adm in admins:
             if (AdminType(adm.admin_type) in allowed_types or adm.admin_type <= adm_type.value) and \
                     (adm.admin_group in [0, update.message.chat.id] or
