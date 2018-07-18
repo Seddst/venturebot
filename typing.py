@@ -158,7 +158,7 @@ class Auth(Base):
     user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
 
 
-def check_admin(update, session, adm_type, allowed_types=()):
+def check_admin(self, update, session, adm_type, allowed_types=()):
     allowed = False
     if adm_type == AdminType.NOT_ADMIN:
         allowed = True
@@ -179,7 +179,7 @@ def check_admin(update, session, adm_type, allowed_types=()):
     return allowed
 
 
-def log(session, user_id, chat_id, func_name, args):
+def log(self, session, user_id, chat_id, func_name, args):
     if user_id:
         log_item = Log()
         log_item.date = datetime.now()
@@ -191,7 +191,7 @@ def log(session, user_id, chat_id, func_name, args):
         session.commit()
 
 
-def check_ban(update, session):
+def check_ban(self, update, session):
     ban = session.query(Ban).filter_by(user_id=update.message.from_user.id)
 
     if ban is None or ban.to_date < datetime.now():
@@ -200,7 +200,7 @@ def check_ban(update, session):
         return False
 
 
-def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
+def admin_allowed(self, adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
     def decorate(func):
         def wrapper(bot: Bot, update, *args, **kwargs):
             session = Session()
