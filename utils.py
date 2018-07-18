@@ -5,7 +5,7 @@ from typing import Session, Group
 
 
 @run_async
-def send_async(self, bot: Bot, *args, **kwargs):
+def send_async(bot: Bot, *args, **kwargs):
     try:
         return bot.sendMessage(*args, **kwargs)
 
