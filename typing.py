@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import (
     create_engine,
-    Column, Integer, DateTime, Boolean, ForeignKey, UnicodeText, BigInteger, Text, VARCHAR
+    Column, Integer, DateTime, Boolean, ForeignKey, BigInteger, Text, VARCHAR
 )
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
@@ -94,7 +94,7 @@ class WelcomeMsg(Base):
     __tablename__ = 'welcomes'
 
     chat_id = Column(BigInteger, primary_key=True)
-    message = Column(UnicodeText(2500))
+    message = Column(VARCHAR(2500))
 
 
 class Wellcomed(Base):
@@ -108,8 +108,8 @@ class Trigger(Base):
     __tablename__ = 'triggers'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    trigger = Column(UnicodeText(2500))
-    message = Column(UnicodeText(2500))
+    trigger = Column(VARCHAR(2500))
+    message = Column(VARCHAR(2500))
     message_type = Column(Integer, default=0)
 
 
@@ -126,8 +126,8 @@ class LocalTrigger(Base):
 
     id = Column(BigInteger, autoincrement=True, primary_key=True)
     chat_id = Column(BigInteger, ForeignKey(Group.id))
-    trigger = Column(UnicodeText(2500))
-    message = Column(UnicodeText(2500))
+    trigger = Column(VARCHAR(2500))
+    message = Column(VARCHAR(2500))
     message_type = Column(Integer, default=0)
 
 
@@ -135,7 +135,7 @@ class Ban(Base):
     __tablename__ = 'banned_users'
 
     user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
-    reason = Column(UnicodeText(2500))
+    reason = Column(VARCHAR(2500))
     from_date = Column(DATETIME(fsp=6))
     to_date = Column(DATETIME(fsp=6))
 
@@ -147,8 +147,8 @@ class Log(Base):
     user_id = Column(BigInteger, ForeignKey(User.id))
     chat_id = Column(BigInteger)
     date = Column(DATETIME(fsp=6))
-    func_name = Column(UnicodeText(2500))
-    args = Column(UnicodeText(2500))
+    func_name = Column(VARCHAR(2500))
+    args = Column(VARCHAR(2500))
 
 
 class Auth(Base):
