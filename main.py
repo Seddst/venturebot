@@ -125,7 +125,7 @@ def del_trigger(self, bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
 
 
-def list_triggers(self, bot, update, session):
+def list_triggers(bot: Bot, update: Update, session):
     triggers = session.query(Trigger).all()
     local_triggers = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
     msg = 'List of current triggers: \n' + \
