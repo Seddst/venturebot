@@ -78,7 +78,7 @@ def help_msg(self, update):
 
 
 def ping(bot, update):
-    send_async(self, bot, chat_id=update.message.chat.id,
+    send_async(bot, chat_id=update.message.chat.id,
                text=message('Go and dig some soulz, @{}!'))
 
 
