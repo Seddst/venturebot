@@ -200,7 +200,7 @@ def check_ban(self, update, session):
         return False
 
 
-def admin_allowed(self, adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
+def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
     def decorate(func):
         def wrapper(bot: Bot, update, *args, **kwargs):
             session = Session()
