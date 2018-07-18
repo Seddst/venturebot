@@ -86,7 +86,7 @@ def echo(self, update: Update):
     update.message.reply_text(update.message.text)
 
 
-def add_trigger(self, bot, update, session):
+def add_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
         trigger_text = msg[1].strip()
@@ -103,7 +103,7 @@ def add_trigger(self, bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
 
-def set_trigger(self, bot, update, session):
+def set_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
         trigger = msg[1].strip()
@@ -114,7 +114,7 @@ def set_trigger(self, bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
 
-def del_trigger(self, bot, update, session):
+def del_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     trigger = session.query(LocalTrigger).filter_by(trigger=msg).first()
     if trigger is not None:
@@ -125,7 +125,7 @@ def del_trigger(self, bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
 
 
-def list_triggers(bot: Bot, update: Update, session):
+def list_triggers(update: Update, session):
     triggers = session.query(Trigger).all()
     local_triggers = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
     msg = 'List of current triggers: \n' + \
