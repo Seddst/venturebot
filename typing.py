@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import (
     create_engine,
-    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, text, VARCHAR, DateTime
+    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, text, VARCHAR, DateTime, func
 )
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
@@ -48,16 +48,16 @@ ENGINE = create_engine(DB,
 LOGGER = logging.getLogger('sqlalchemy.engine')
 Base = declarative_base()
 Session = scoped_session(sessionmaker(bind=ENGINE))
-session = Session()
+Session()
 
 
 class Group(Base):
     __tablename__ = 'groups'
 
-    id = Column(BigInteger, primary_key=True)  # FIX: invalid name
-    username = Column(VARCHAR(250))
-    title = Column(VARCHAR(250))
-    welcome_enabled = Column(Boolean, default=True)  # if errors change back to default of false
+    id = Column(Integer, primary_key=True)  # FIX: invalid name
+    username = Column(text)
+    title = Column(text)
+    welcome_enabled = Column(Boolean, default=False)  # if errors change back to default of false
     allow_trigger_all = Column(Boolean, default=False)
     allow_pin_all = Column(Boolean, default=False)
     bot_in_group = Column(Boolean, default=True)
@@ -66,11 +66,11 @@ class Group(Base):
 class User(Base):
     __tablename__ = 'users'
 
-    id = Column(BigInteger, primary_key=True)
-    username = Column(VARCHAR(250))
-    first_name = Column(VARCHAR(250))
-    last_name = Column(VARCHAR(250))
-    date_added = Column(DateTime, default=datetime.now())
+    id = Column(Integer, primary_key=True)
+    username = Column(text)
+    first_name = Column(text)
+    last_name = Column(text)
+    date_added = Column(DateTime, default=func.now())
 
     def __repr__(self):
         user = ''
@@ -94,77 +94,77 @@ class User(Base):
 class WelcomeMsg(Base):
     __tablename__ = 'welcomes'
 
-    chat_id = Column(BigInteger, primary_key=True)
-    message = Column(VARCHAR(2500))
+    chat_id = Column(Integer, primary_key=True)
+    message = Column(text)
 
 
 class Wellcomed(Base):
     __tablename__ = 'wellcomed'
 
-    user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
-    chat_id = Column(BigInteger, ForeignKey(WelcomeMsg.chat_id), primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.id), primary_key=True)
+    chat_id = Column(Integer, ForeignKey(WelcomeMsg.chat_id), primary_key=True)
 
 
 class Trigger(Base):
     __tablename__ = 'triggers'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    trigger = Column(VARCHAR(2500))
-    message = Column(VARCHAR(2500))
+    trigger = Column(text)
+    message = Column(text)
     message_type = Column(Integer, default=0)
 
 
 class Admin(Base):
     __tablename__ = 'admins'
 
-    user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.id), primary_key=True)
     admin_type = Column(Integer)
-    admin_group = Column(BigInteger, primary_key=True, default=0)
+    admin_group = Column(Integer, primary_key=True, default=0)
 
 
 class LocalTrigger(Base):
     __tablename__ = 'local_triggers'
 
-    id = Column(BigInteger, autoincrement=True, primary_key=True)
-    chat_id = Column(BigInteger, ForeignKey(Group.id))
-    trigger = Column(VARCHAR(2500))
-    message = Column(VARCHAR(2500))
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    chat_id = Column(Integer, ForeignKey(Group.id))
+    trigger = Column(text)
+    message = Column(text)
     message_type = Column(Integer, default=0)
 
 
 class Ban(Base):
     __tablename__ = 'banned_users'
 
-    user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
-    reason = Column(VARCHAR(2500))
-    from_date = Column(TIMESTAMP)
-    to_date = Column(TIMESTAMP)
+    user_id = Column(Integer, ForeignKey(User.id), primary_key=True)
+    reason = Column(text)
+    from_date = Column(DateTime, default=func.now())
+    to_date = Column(DateTime, default=func.now())
 
 
 class Log(Base):
     __tablename__ = 'log'
 
-    id = Column(BigInteger, autoincrement=True, primary_key=True)
-    user_id = Column(BigInteger, ForeignKey(User.id))
-    chat_id = Column(BigInteger)
-    date = Column(TIMESTAMP)
-    func_name = Column(VARCHAR(2500))
-    args = Column(VARCHAR(2500))
+    id = Column(Integer, autoincrement=True, primary_key=True)
+    user_id = Column(Integer, ForeignKey(User.id))
+    chat_id = Column(Integer)
+    date = Column(DateTime, default=func.now())
+    func_name = Column(text)
+    args = Column(text)
 
 
 class Auth(Base):
     __tablename__ = 'auth'
 
-    id = Column(TIMESTAMP)
-    user_id = Column(BigInteger, ForeignKey(User.id), primary_key=True)
+    id = Column(DateTime, default=func.now())
+    user_id = Column(Integer, ForeignKey(User.id), primary_key=True)
 
 
-def check_admin(update, session, adm_type, allowed_types=()):
+def check_admin(update, adm_type, allowed_types=()):
     allowed = False
     if adm_type == AdminType.NOT_ADMIN:
         allowed = True
     else:
-        admins = session.query(Admin).filter_by(user_id=update.message.from_user.id).all()
+        admins = Session().query(Admin).filter_by(user_id=update.message.from_user.id).all()
         for adm in admins:
             if (AdminType(adm.admin_type) in allowed_types or adm.admin_type <= adm_type.value) and \
                     (adm.admin_group in [0, update.message.chat.id] or
@@ -180,8 +180,8 @@ def check_admin(update, session, adm_type, allowed_types=()):
     return allowed
 
 
-def check_ban(update, session):
-    ban = session.query(Ban).filter_by(user_id=update.message.from_user.id).first()
+def check_ban(update):
+    ban = Session().query(Ban).filter_by(user_id=update.message.from_user.id).first()
                                        
 
     if ban is None or ban.to_date < TIMESTAMP:
@@ -189,32 +189,19 @@ def check_ban(update, session):
     else:
         return False
 
+    
+def log(user_id, chat_id, func_name, args):
+    if user_id:
+        log_item = Log()
+        log_item.date = datetime.now()
+        log_item.user_id = user_id
+        log_item.chat_id = chat_id
+        log_item.func_name = func_name
+        log_item.args = args
+        s = Session()
+        s.add(log_item)
+        s.commit()
+        #Session.remove()
 
-def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
-    def decorate(func):
-        def wrapper(bot: Bot, update, *args, **kwargs):
-            session = Session()
-            try:
-                allowed = check_admin(update, session, adm_type, allowed_types)
-                if ban_enable:
-                    allowed &= check_ban(update, session)
-                    if allowed:
-                                                    
-                        func(bot, update, session, *args, **kwargs)
-            except SQLAlchemyError as err:
-                bot.logger.error(str(err))
-                session.rollback()
-
-        return wrapper
-
-    return decorate
-
-def user_allowed(ban_enable=True):
-    if callable(ban_enable):
-        return admin_allowed(AdminType.NOT_ADMIN)(ban_enable)
-    else:
-        def wrap(func):
-            return admin_allowed(AdminType.NOT_ADMIN, ban_enable)(func)
-    return wrap
 
 Base.metadata.create_all(ENGINE)
