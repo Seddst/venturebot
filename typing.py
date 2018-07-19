@@ -180,18 +180,6 @@ def check_admin(update, session, adm_type, allowed_types=()):
     return allowed
 
 
-def log(session, user_id, chat_id, func_name, args):
-    if user_id:
-        log_item = Log()
-        log_item.date = datetime.now()
-        log_item.user_id = user_id
-        log_item.chat_id = chat_id
-        log_item.func_name = func_name
-        log_item.args = args
-        session.add(log_item)
-        session.commit()
-
-
 def check_ban(update, session):
     ban = session.query(Ban).filter_by(user_id=update.message.from_user.id).first()
                                        
