@@ -27,7 +27,7 @@ def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
                         )
                     # Fixme: Issues a message-update even if message did not change. This
                     # raises a telegram.error.BadRequest exception!
-                    func(bot, update, *args, **kwargs)
+                    func(bot, update, Session, *args, **kwargs)
             except SQLAlchemyError as err:
                 bot.logger.error(str(err))
                 Session.rollback()
