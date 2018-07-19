@@ -12,6 +12,7 @@ Session()
 def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
     def decorate(func):
         def wrapper(bot: Bot, update, *args, **kwargs):
+            Session()
             try:
                 allowed = check_admin(update, adm_type, allowed_types)
                 if ban_enable:
@@ -26,7 +27,7 @@ def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
                         )
                     # Fixme: Issues a message-update even if message did not change. This
                     # raises a telegram.error.BadRequest exception!
-                    func(bot, update, Session, *args, **kwargs)
+                    func(bot, update, *args, **kwargs)
             except SQLAlchemyError as err:
                 bot.logger.error(str(err))
                 Session.rollback()
