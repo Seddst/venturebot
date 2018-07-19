@@ -4,7 +4,7 @@ from functools import wraps
 from sqlalchemy.exc import SQLAlchemyError
 from telegram import Bot, Update
 
-from core.typing import AdminType, check_admin, check_ban, log, Session
+from typing import AdminType, check_admin, check_ban, log, Session
 
 Session()
 
