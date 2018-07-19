@@ -199,8 +199,7 @@ def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
                 if ban_enable:
                     allowed &= check_ban(update, session)
                     if allowed:
-                        if func.__name__ not in ['list_trigger', 'trigger_show', 'user_panel' 'wrapper', 'welcome']:
-                            
+                                                    
                         func(bot, update, session, *args, **kwargs)
             except SQLAlchemyError as err:
                 bot.logger.error(str(err))
