@@ -5,7 +5,7 @@ import logging
 
 from sqlalchemy import (
     create_engine,
-    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, text, VARCHAR, DateTime, func
+    Column, Integer, TIMESTAMP, Boolean, ForeignKey, BigInteger, text, VARCHAR, DateTime, func, String
 )
 from sqlalchemy.dialects.mysql import DATETIME
 from sqlalchemy.ext.declarative import declarative_base
@@ -55,8 +55,8 @@ class Group(Base):
     __tablename__ = 'groups'
 
     id = Column(Integer, primary_key=True)  # FIX: invalid name
-    username = Column(text)
-    title = Column(text)
+    username = Column(String)
+    title = Column(String)
     welcome_enabled = Column(Boolean, default=False)  # if errors change back to default of false
     allow_trigger_all = Column(Boolean, default=False)
     allow_pin_all = Column(Boolean, default=False)
@@ -67,9 +67,9 @@ class User(Base):
     __tablename__ = 'users'
 
     id = Column(Integer, primary_key=True)
-    username = Column(text)
-    first_name = Column(text)
-    last_name = Column(text)
+    username = Column(String)
+    first_name = Column(String)
+    last_name = Column(String)
     date_added = Column(DateTime, default=func.now())
 
     def __repr__(self):
@@ -95,7 +95,7 @@ class WelcomeMsg(Base):
     __tablename__ = 'welcomes'
 
     chat_id = Column(Integer, primary_key=True)
-    message = Column(text)
+    message = Column(String)
 
 
 class Wellcomed(Base):
@@ -109,8 +109,8 @@ class Trigger(Base):
     __tablename__ = 'triggers'
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    trigger = Column(text)
-    message = Column(text)
+    trigger = Column(String)
+    message = Column(String)
     message_type = Column(Integer, default=0)
 
 
@@ -127,8 +127,8 @@ class LocalTrigger(Base):
 
     id = Column(Integer, autoincrement=True, primary_key=True)
     chat_id = Column(Integer, ForeignKey(Group.id))
-    trigger = Column(text)
-    message = Column(text)
+    trigger = Column(String)
+    message = Column(String)
     message_type = Column(Integer, default=0)
 
 
@@ -136,7 +136,7 @@ class Ban(Base):
     __tablename__ = 'banned_users'
 
     user_id = Column(Integer, ForeignKey(User.id), primary_key=True)
-    reason = Column(text)
+    reason = Column(String)
     from_date = Column(DateTime, default=func.now())
     to_date = Column(DateTime, default=func.now())
 
@@ -148,8 +148,8 @@ class Log(Base):
     user_id = Column(Integer, ForeignKey(User.id))
     chat_id = Column(Integer)
     date = Column(DateTime, default=func.now())
-    func_name = Column(text)
-    args = Column(text)
+    func_name = Column(String)
+    args = Column(String)
 
 
 class Auth(Base):
