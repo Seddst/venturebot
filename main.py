@@ -190,7 +190,7 @@ def add_trigger_db(self, msg: Message, chat, trigger_text: str, session):
     session.add(trigger)
     session.commit()
 
-
+@admin_allowed(adm_type=AdminType.GROUP)
 def set_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
@@ -203,7 +203,7 @@ def set_welcome(bot, update, session):
         session.commit()
         send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
 
-
+@admin_allowed(adm_type=AdminType.GROUP)
 def enable_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
@@ -212,7 +212,7 @@ def enable_welcome(bot, update, session):
         session.commit()
         send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
-
+@admin_allowed(adm_type=AdminType.GROUP)
 def disable_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
@@ -221,8 +221,9 @@ def disable_welcome(bot, update, session):
         session.commit()
         send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
 
-
+@admin_allowed(adm_type=AdminType.GROUP)
 def show_welcome(bot, update, session):
+  
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
@@ -234,7 +235,7 @@ def show_welcome(bot, update, session):
 
 
 @admin_allowed()
-def set_admin(bot, update, session):
+def set_admin(bot: Bot, update: Update, session):
     msg = update.message.text.split(' ', 1)[1]
     msg = msg.replace('@', '')
     if msg != '':
