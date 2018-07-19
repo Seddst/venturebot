@@ -191,7 +191,7 @@ def add_trigger_db(self, msg: Message, chat, trigger_text: str, session):
     session.commit()
 
 
-def set_welcome(self, bot, update, session):
+def set_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
@@ -204,7 +204,7 @@ def set_welcome(self, bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
 
 
-def enable_welcome(self, bot, update, session):
+def enable_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         group.welcome_enabled = True
@@ -213,7 +213,7 @@ def enable_welcome(self, bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
 
-def disable_welcome(self, bot, update, session):
+def disable_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         group.welcome_enabled = False
@@ -222,7 +222,7 @@ def disable_welcome(self, bot, update, session):
         send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
 
 
-def show_welcome(self, bot, update, session):
+def show_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
         welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
@@ -234,7 +234,7 @@ def show_welcome(self, bot, update, session):
 
 
 @admin_allowed()
-def set_admin(self, bot, update, session):
+def set_admin(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     msg = msg.replace('@', '')
     if msg != '':
@@ -267,7 +267,7 @@ Check the commands list with /help command""".format(user.username))
 
 
 @admin_allowed()
-def del_admin(self, bot, update, session):
+def del_admin(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     if msg.find('@') != -1:
         msg = msg.replace('@', '')
