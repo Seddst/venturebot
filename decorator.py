@@ -8,6 +8,7 @@ from typing import AdminType, check_admin, check_ban, log, Session
 
 Session()
 
+
 def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
     def decorate(func):
         def wrapper(bot: Bot, update, *args, **kwargs):
