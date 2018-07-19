@@ -84,20 +84,7 @@ def ping(bot: Bot, update: Update):
 def echo(self, update: Update):
     """Echo the user message."""
     update.message.reply_text(update.message.text)
-    
-    
-def trigger_decorator(func):
-    @user_allowed
-    def wrapper(bot, update, session, *args, **kwargs):
-        group = update_group(update.message.chat, session)
-        if group is None and \
-                check_admin(update, session, AdminType.FULL) or \
-                group is not None and \
-                (group.allow_trigger_all or
-                 check_admin(update, session, AdminType.GROUP)):
-            func(bot, update, session, *args, **kwargs)
-    return wrapper
-  
+      
     
 def trigger_decorator(func):
     @user_allowed
@@ -112,6 +99,7 @@ def trigger_decorator(func):
     return wrapper   
   
 
+@trigger_decorator  
 def add_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
@@ -128,7 +116,8 @@ def add_trigger(bot, update, session):
     else:
         send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
-
+        
+@trigger_decorator
 def set_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
@@ -139,7 +128,8 @@ def set_trigger(bot, update, session):
     else:
         send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
-
+        
+@trigger_decorator
 def del_trigger(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     trigger = session.query(LocalTrigger).filter_by(trigger=msg).first()
