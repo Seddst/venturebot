@@ -20,7 +20,7 @@ def send_async(bot: Bot, *args, **kwargs):
         return None
 
 
-def update_group(self, grp, session):
+def update_group(grp, session):
     if grp.type in ['group', 'supergroup' 'channel']:
         group = session.query(Group).filter_by(id=grp.id).first()
         if group is None:
