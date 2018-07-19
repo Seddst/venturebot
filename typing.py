@@ -193,8 +193,8 @@ def log(session, user_id, chat_id, func_name, args):
 
 
 def check_ban(update, session):
-    ban = session.query(Ban).filter_by(user_id=update.message.from_user.id 
-                                       if update.message)
+    ban = session.query(Ban).filter_by(user_id=update.message.from_user.id).first()
+                                       
 
     if ban is None or ban.to_date < TIMESTAMP:
         return True
