@@ -191,7 +191,7 @@ def add_trigger_db(msg: Message, chat, trigger_text: str, session):
     session.add(trigger)
     session.commit()
 
-@admin_allowed()
+@admin_allowed(self)
 def set_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
