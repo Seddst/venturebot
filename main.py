@@ -213,7 +213,7 @@ def enable_welcome(bot, update, session):
         session.commit()
         send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
-@admin_allowed(func)
+@admin_allowed
 def disable_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
@@ -222,7 +222,7 @@ def disable_welcome(bot, update, session):
         session.commit()
         send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
 
-@admin_allowed(func)
+@admin_allowed
 def show_welcome(bot, update, session):
   
     if update.message.chat.type in ['group']:
@@ -235,7 +235,7 @@ def show_welcome(bot, update, session):
         send_async(bot, chat_id=group.id, text=welcome_msg.message)
 
 
-@admin_allowed(func)
+@admin_allowed
 def set_admin(bot: Bot, update: Update, session):
     msg = update.message.text.split(' ', 1)[1]
     msg = msg.replace('@', '')
@@ -268,7 +268,7 @@ Check the commands list with /help command""".format(user.username))
                            text='@{} already has administrator rights'.format(user.username))
 
 
-@admin_allowed(func)
+@admin_allowed
 def del_admin(bot, update, session):
     msg = update.message.text.split(' ', 1)[1]
     if msg.find('@') != -1:
@@ -310,7 +310,7 @@ def del_adm(bot, chat_id, user, session):
                    text='@{}, now you have no power here!'.format(user.username))
 
 
-@admin_allowed(func)
+@admin_allowed
 def list_admins(self, bot, update, session):
     admins = session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
     users = []
@@ -326,7 +326,7 @@ def list_admins(self, bot, update, session):
     send_async(bot, chat_id=update.message.chat.id, text=msg)
 
 
-@admin_allowed(func)
+@admin_allowed
 def ban(self, bot: Bot, update: Update, session):
     username, reason = update.message.text.split(' ', 2)[1:]
     username = username.replace('@', '')
@@ -356,7 +356,7 @@ def ban(self, bot: Bot, update: Update, session):
         send_async(bot, chat_id=update.message.chat.id, text='No such user')
 
 
-@admin_allowed(func)
+@admin_allowed
 def unban(self, bot, update, session):
     username = update.message.text.split(' ', 1)[1]
     username = username.replace('@', '')
@@ -379,7 +379,7 @@ def error(self, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
-@admin_allowed(func)
+@admin_allowed
 def kick(self, bot, update):
     bot.leave_chat(update.message.chat.id)
 
