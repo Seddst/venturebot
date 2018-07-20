@@ -3,42 +3,36 @@ from functools import wraps
 
 from sqlalchemy.exc import SQLAlchemyError
 from telegram import Bot, Update
-
+from MWT import MWT
 from typing import AdminType, check_admin, check_ban, log, Session
 
 Session()
 
 
-def admin_allowed(adm_type=AdminType.FULL, ban_enable=True, allowed_types=()):
-    def decorate(func):
-        def wrapper(bot: Bot, update, *args, **kwargs):
-            Session()
-            try:
-                allowed = check_admin(update, adm_type, allowed_types)
-                if ban_enable:
-                    allowed &= check_ban(update)
-                if allowed:
-                    if func.__name__ not in ['manage_all', 'trigger_show', 'user_panel', 'wrapper', 'welcome']:
-                        log(
-                            update.effective_user.id,
-                            update.effective_chat.id,
-                            func.__name__,
-                            update.message.text if update.message else None or update.callback_query.data if update.callback_query else None
-                        )
-                    # Fixme: Issues a message-update even if message did not change. This
-                    # raises a telegram.error.BadRequest exception!
-                    func(bot, update, Session, *args, **kwargs)
-            except SQLAlchemyError as err:
-                bot.logger.error(str(err))
-                Session.rollback()
-        return wrapper
-    return decorate
-    
-    
+@MWT(timeout=60*60)
+def get_admin_ids(bot, chat_id):
+    """Returns a list of admin IDs for a given chat. Results are cached for 1 hour."""
+    return [admin.user.id for admin in bot.get_chat_administrators(chat_id)]
+
+
+def admin_allowed(func):
+    @wraps(func)
+    def wrapped(bot, update, *args, **kwargs):
+        if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
+
+                user_id = update.effective_user.id
+                if user_id not in get_admin_ids:
+                    print("Unauthorized access denied for {}.".format(user_id))
+                    return
+                return func(bot, update, *args, **kwargs)
+
+        return wrapped
+
+
 def user_allowed(ban_enable=True):
     if callable(ban_enable):
-        return admin_allowed(AdminType.NOT_ADMIN)(ban_enable)
+        return admin_allowed
     else:
         def wrap(func):
-            return admin_allowed(AdminType.NOT_ADMIN, ban_enable)(func)
+            return admin_allowed(func)
     return wrap
