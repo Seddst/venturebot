@@ -23,7 +23,7 @@ def admin_allowed(func):
                 user_id = update.effective_user.id
                 if user_id not in get_admin_ids:
                     print("Unauthorized access denied for {}.".format(user_id))
-                    return 
+                    
                 return func(bot, update, *args, **kwargs)
 
         return wrapped
