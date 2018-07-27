@@ -21,13 +21,15 @@ def admin_allowed(func, wrapped):
         if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
 
                 user_id = update.effective_user.id
-                     print("AUTHORIZED ACESS")
+                          print("AUTHORIZED ACESS")
                 if user_id not in get_admin_ids:
                     print("Unauthorized access denied for {}.".format(user_id))
                     
                 return func(bot, update, *args, **kwargs)
 
         return wrapped
+    return admin_allowed
+    
 
 
 def user_allowed(ban_enable=True):
