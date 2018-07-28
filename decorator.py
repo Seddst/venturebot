@@ -15,7 +15,7 @@ def get_admin_ids(bot, chat_id):
     return [admin.user.id for admin in bot.get_chat_administrators(chat_id)]
 
 
-def admin_allowed(func):
+def admin_allowed(func, bot):
     @wraps(func)
     def wrapped(bot, update, *args, **kwargs):
         if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
