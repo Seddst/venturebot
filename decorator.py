@@ -14,22 +14,14 @@ def get_admin_ids(bot, chat_id):
     """Returns a list of admin IDs for a given chat. Results are cached for 1 hour."""
     return [admin.user.id for admin in bot.get_chat_administrators(chat_id)]
 
+def admin_allowed(bot, update):
 
-def admin_allowed(func):
-    
-    def wrapped(bot, update, *args, **kwargs):
-        if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-
-                user_id = update.effective_user.id
-                print("access accepted")          
-                if user_id not in get_admin_ids:
-                    print("Unauthorized access denied for {}.".format(user_id))
-                    
-                return func(bot, update, *args, **kwargs)
-
-        return wrapped
-    return admin_allowed
-    
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
+            user_id = update.effective_user.id
+            print("access accepted?")
+            if user_id not in get_admin_ids:
+                print("Unauthorized access denied for {}.".format(user_id))
+                return 
 
 
 def user_allowed(ban_enable=True):
