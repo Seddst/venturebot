@@ -21,7 +21,7 @@ def admin_allowed(bot, update):
             
             update.message.reply_text("access accepted?")
             if update.message.from_user.id not in get_admin_ids:
-                update.message.reply_text("Unauthorized access denied for {}.")
+                update.message.reply_text("Unauthorized access denied for {}.".format(update.message.from_user.id))
                 return 
 
 
