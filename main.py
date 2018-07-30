@@ -191,7 +191,7 @@ def add_trigger_db(msg: Message, chat, trigger_text: str, session):
     session.add(trigger)
     session.commit()
 
-    
+@admin_allowed    
 def set_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
@@ -204,7 +204,7 @@ def set_welcome(bot, update, session):
         session.commit()
         send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
 
-
+@admin_allowed
 def enable_welcome(bot, update, session):
     if update.message.chat.type in ['group']:
         group = update_group(update.message.chat, session)
