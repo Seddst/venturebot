@@ -13,14 +13,3 @@ Session()
 def get_admin_ids(bot, chat_id):
     """Returns a list of admin IDs for a given chat. Results are cached for 1 hour."""
     return [admin.user.id for admin in bot.get_chat_administrators(chat_id)]
-
-
-
-
-def user_allowed(ban_enable=True):
-    if callable(ban_enable):
-        return admin_allowed
-    else:
-        def wrap(func):
-            return admin_allowed(func)
-    return wrap
