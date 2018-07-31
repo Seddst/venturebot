@@ -210,14 +210,12 @@ def set_welcome(bot, update, session):
 def enable_welcome(bot, update, session):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")
-      if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-          update.message.reply_text("access allowed?")
-          if update.message.chat.type in ['group']:
-              group = update_group(update.message.chat, session)
-              group.welcome_enabled = True
-              session.add(group)
-              session.commit()
-              send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
+        if update.message.chat.type in ['group']:
+            group = update_group(update.message.chat, session)
+            group.welcome_enabled = True
+            session.add(group)
+            session.commit()
+            send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
 
 def disable_welcome(bot, update, session):
