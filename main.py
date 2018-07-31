@@ -221,87 +221,87 @@ def enable_welcome(bot, update, session):
 def disable_welcome(bot, update, session):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")
-      if update.message.chat.type in ['group']:
-          group = update_group(update.message.chat, session)
-          group.welcome_enabled = False
-          session.add(group)
-          session.commit()
-          send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
+        if update.message.chat.type in ['group']:
+            group = update_group(update.message.chat, session)
+            group.welcome_enabled = False
+            session.add(group)
+            session.commit()
+            send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
 
         
 def show_welcome(bot, update, session):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")
-      if update.message.chat.type in ['group']:
-          group = update_group(update.message.chat, session)
-          welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
-          if welcome_msg is None:
-              welcome_msg = WelcomeMsg(chat_id=group.id, message='Hi, %username%!')
-              session.add(welcome_msg)
-              session.commit()
-          send_async(bot, chat_id=group.id, text=welcome_msg.message)
+        if update.message.chat.type in ['group']:
+            group = update_group(update.message.chat, session)
+            welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
+            if welcome_msg is None:
+                welcome_msg = WelcomeMsg(chat_id=group.id, message='Hi, %username%!')
+                session.add(welcome_msg)
+                session.commit()
+            send_async(bot, chat_id=group.id, text=welcome_msg.message)
 
 
 
 def set_admin(bot: Bot, update: Update, session):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")
-      msg = update.message.text.split(' ', 1)[1]
-      msg = msg.replace('@', '')
-      if msg != '':
-          user = session.query(User).filter_by(username=msg).first()
-          if user is None:
-              send_async(bot,
-                         chat_id=update.message.chat.id,
-                         text='No such user')
+        msg = update.message.text.split(' ', 1)[1]
+        msg = msg.replace('@', '')
+        if msg != '':
+            user = session.query(User).filter_by(username=msg).first()
+            if user is None:
+                send_async(bot,
+                           chat_id=update.message.chat.id,
+                           text='No such user')
 
-          else:
-              adm = session.query(Admin).filter_by(user_id=user.id,
-                                                   admin_group=update.message.chat.id).first()
+            else:
+                adm = session.query(Admin).filter_by(user_id=user.id,
+                                                     admin_group=update.message.chat.id).first()
 
-              if adm is None:
-                  new_group_admin = Admin(user_id=user.id,
-                                          admin_type=AdminType.GROUP.value,
-                                          admin_group=update.message.chat.id)
+                if adm is None:
+                    new_group_admin = Admin(user_id=user.id,
+                                            admin_type=AdminType.GROUP.value,
+                                            admin_group=update.message.chat.id)
 
-                  session.add(new_group_admin)
-                  session.commit()
-                  send_async(bot,
-                             chat_id=update.message.chat.id,
-                             text="""Welcome our new administrator: @{}!
-  Check the commands list with /help command""".format(user.username))
+                    session.add(new_group_admin)
+                    session.commit()
+                    send_async(bot,
+                               chat_id=update.message.chat.id,
+                               text="""Welcome our new administrator: @{}!
+    Check the commands list with /help command""".format(user.username))
 
-              else:
-                  send_async(bot,
-                             chat_id=update.message.chat.id,
-                             text='@{} already has administrator rights'.format(user.username))
+                else:
+                    send_async(bot,
+                               chat_id=update.message.chat.id,
+                               text='@{} already has administrator rights'.format(user.username))
 
 
 
 def del_admin(bot, update, session):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")
-      msg = update.message.text.split(' ', 1)[1]
-      if msg.find('@') != -1:
-          msg = msg.replace('@', '')
-          if msg != '':
-              user = session.query(User).filter_by(username=msg).first()
-              if user is None:
-                  send_async(bot,
-                             chat_id=update.message.chat.id,
-                             text='No such user')
+        msg = update.message.text.split(' ', 1)[1]
+        if msg.find('@') != -1:
+            msg = msg.replace('@', '')
+            if msg != '':
+                user = session.query(User).filter_by(username=msg).first()
+                if user is None:
+                    send_async(bot,
+                               chat_id=update.message.chat.id,
+                               text='No such user')
 
-              else:
-                  del_adm(bot, update.message.chat.id, user, session)
-      else:
-          user = session.query(User).filter_by(id=msg).first()
-          if user is None:
-              send_async(bot,
-                         chat_id=update.message.chat.id,
-                         text='No such user')
+                else:
+                    del_adm(bot, update.message.chat.id, user, session)
+        else:
+            user = session.query(User).filter_by(id=msg).first()
+            if user is None:
+                send_async(bot,
+                           chat_id=update.message.chat.id,
+                           text='No such user')
 
-          else:
-              del_adm(bot, update.message.chat.id, user, session)
+            else:
+                del_adm(bot, update.message.chat.id, user, session)
 
 
 def del_adm(bot, chat_id, user, session):
@@ -323,70 +323,72 @@ def del_adm(bot, chat_id, user, session):
 
 
 def list_admins(self, bot, update, session):
-    admins = session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
-    users = []
-    for admin_user in admins:
-        users.append(session.query(User).filter_by(id=admin_user.user_id).first())
-    msg = 'Administrators list:\n'
-    for user in users:
-        msg += '{} @{} {} {}\n'.format(user.id,
-                                       user.username,
-                                       user.first_name,
-                                       user.last_name)
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
+        update.message.reply_text("access allowed?")  
+        admins = session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
+        users = []
+        for admin_user in admins:
+            users.append(session.query(User).filter_by(id=admin_user.user_id).first())
+        msg = 'Administrators list:\n'
+        for user in users:
+            msg += '{} @{} {} {}\n'.format(user.id,
+                                           user.username,
+                                           user.first_name,
+                                           user.last_name)
 
-    send_async(bot, chat_id=update.message.chat.id, text=msg)
+        send_async(bot, chat_id=update.message.chat.id, text=msg)
 
 
 
 def ban(self, bot: Bot, update: Update, session):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")
-      username, reason = update.message.text.split(' ', 2)[1:]
-      username = username.replace('@', '')
-      user = session.query(User).filter_by(username=username).first()
-      if user:
-          banned = session.query(Ban).filter_by(user_id=user.id).first()
-          if banned:
-              send_async(bot, chat_id=update.message.chat.id,
-                         text='This user is already banned. The reason is: .'.format(banned.to_date, banned.reason))
-          else:
-              banned = Ban()
-              banned.user_id = user.id
-              banned.from_date = datetime.now()
-              banned.to_date = datetime.max
-              banned.reason = reason or 'Reason not specified'
-              member = session.query().filter_by(user_id=user.id).first()
-              if member:
-                  session.delete(member)
-              admins = session.query(Admin).filter_by(user_id=user.id).all()
-              for admin in admins:
-                  session.delete(admin)
-              session.add(banned)
-              session.commit()
-              send_async(bot, chat_id=user.id, text='You were banned because: {}'.format(banned.reason))
-              send_async(bot, chat_id=update.message.chat.id, text='Soldier successfully banned')
-      else:
-          send_async(bot, chat_id=update.message.chat.id, text='No such user')
+        username, reason = update.message.text.split(' ', 2)[1:]
+        username = username.replace('@', '')
+        user = session.query(User).filter_by(username=username).first()
+        if user:
+            banned = session.query(Ban).filter_by(user_id=user.id).first()
+            if banned:
+                send_async(bot, chat_id=update.message.chat.id,
+                           text='This user is already banned. The reason is: .'.format(banned.to_date, banned.reason))
+            else:
+                banned = Ban()
+                banned.user_id = user.id
+                banned.from_date = datetime.now()
+                banned.to_date = datetime.max
+                banned.reason = reason or 'Reason not specified'
+                member = session.query().filter_by(user_id=user.id).first()
+                if member:
+                    session.delete(member)
+                admins = session.query(Admin).filter_by(user_id=user.id).all()
+                for admin in admins:
+                    session.delete(admin)
+                session.add(banned)
+                session.commit()
+                send_async(bot, chat_id=user.id, text='You were banned because: {}'.format(banned.reason))
+                send_async(bot, chat_id=update.message.chat.id, text='Soldier successfully banned')
+        else:
+            send_async(bot, chat_id=update.message.chat.id, text='No such user')
 
 
 
 def unban(self, bot, update, session):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")
-      username = update.message.text.split(' ', 1)[1]
-      username = username.replace('@', '')
-      user = session.query(User).filter_by(username=username).first()
-      if user:
-          banned = session.query(Ban).filter_by(user_id=user.id).first()
-          if banned:
-              session.delete(banned)
-              session.commit()
-              send_async(bot, chat_id=user.id, text='We can talk again 🌚')
-              send_async(bot, chat_id=update.message.chat.id, text='{} is no longer banned.'.format('@' + user.username))
-          else:
-              send_async(bot, chat_id=update.message.chat.id, text='This soldier is not banned')
-      else:
-          send_async(bot, chat_id=update.message.chat.id, text='No such user')
+        username = update.message.text.split(' ', 1)[1]
+        username = username.replace('@', '')
+        user = session.query(User).filter_by(username=username).first()
+        if user:
+            banned = session.query(Ban).filter_by(user_id=user.id).first()
+            if banned:
+                session.delete(banned)
+                session.commit()
+                send_async(bot, chat_id=user.id, text='We can talk again 🌚')
+                send_async(bot, chat_id=update.message.chat.id, text='{} is no longer banned.'.format('@' + user.username))
+            else:
+                send_async(bot, chat_id=update.message.chat.id, text='This soldier is not banned')
+        else:
+            send_async(bot, chat_id=update.message.chat.id, text='No such user')
 
 
 def error(self, update, error):
@@ -398,7 +400,7 @@ def error(self, update, error):
 def kick(self, bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")
-      bot.leave_chat(update.message.chat.id)
+        bot.leave_chat(update.message.chat.id)
 
 
 def main():
