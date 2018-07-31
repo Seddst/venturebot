@@ -16,7 +16,7 @@ from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, check_admin
-from decorator import user_allowed, get_admin_ids
+from decorator import get_admin_ids
 from config import TOKEN
 from utils import send_async, update_group
 from telegram import Update, Bot, Message, ParseMode
