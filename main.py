@@ -89,13 +89,13 @@ def echo(self, update: Update):
     
 def trigger_decorator(func):
     
-    def wrapper(bot, update, session, *args, **kwargs):
-        group = update_group(update.message.chat, session)
+    def wrapper(bot, update, Session(), *args, **kwargs):
+        group = update_group(update.message.chat, Session())
         if group is None \
                  or \
                 group is not None and \
                 (group.allow_trigger_all or
-                 check_admin(update, session, AdminType.GROUP)):
+                 check_admin(update, Session(), AdminType.GROUP)):
             func(bot, update, session, *args, **kwargs)
     return wrapper   
   
