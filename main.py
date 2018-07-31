@@ -16,7 +16,7 @@ from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, check_admin
-from decorator import user_allowed, admin_allowed
+from decorator import user_allowed, admin_allowed, get_admin_ids
 from config import TOKEN
 from utils import send_async, update_group
 from telegram import Update, Bot, Message, ParseMode
@@ -91,8 +91,8 @@ def trigger_decorator(func):
     @user_allowed
     def wrapper(bot, update, session, *args, **kwargs):
         group = update_group(update.message.chat, session)
-        if group is None and \
-                check_admin(update, session, AdminType.FULL) or \
+        if group is None \
+                 or \
                 group is not None and \
                 (group.allow_trigger_all or
                  check_admin(update, session, AdminType.GROUP)):
@@ -193,25 +193,29 @@ def add_trigger_db(msg: Message, chat, trigger_text: str, session):
 
     
 def set_welcome(bot, update, session):
-    if update.message.chat.type in ['group']:
-        group = update_group(update.message.chat, session)
-        welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
-        if welcome_msg is None:
-            welcome_msg = WelcomeMsg(chat_id=group.id, message=update.message.text.split(' ', 1)[1])
-        else:
-            welcome_msg.message = update.message.text.split(' ', 1)[1]
-        session.add(welcome_msg)
-        session.commit()
-        send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
+        update.message.reply_text("access allowed?")
+        if update.message.chat.type in ['group']:
+            group = update_group(update.message.chat, session)
+            welcome_msg = session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
+            if welcome_msg is None:
+                welcome_msg = WelcomeMsg(chat_id=group.id, message=update.message.text.split(' ', 1)[1])
+            else:
+                welcome_msg.message = update.message.text.split(' ', 1)[1]
+            session.add(welcome_msg)
+            session.commit()
+            send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
 
 
 def enable_welcome(bot, update, session):
-    if update.message.chat.type in ['group']:
-        group = update_group(update.message.chat, session)
-        group.welcome_enabled = True
-        session.add(group)
-        session.commit()
-        send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
+        update.message.reply_text("access allowed?")
+        if update.message.chat.type in ['group']:
+            group = update_group(update.message.chat, session)
+            group.welcome_enabled = True
+            session.add(group)
+            session.commit()
+            send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
 
 def disable_welcome(bot, update, session):
