@@ -88,7 +88,7 @@ def echo(self, update: Update):
       
     
 def trigger_decorator(func):
-    @user_allowed
+    
     def wrapper(bot, update, session, *args, **kwargs):
         group = update_group(update.message.chat, session)
         if group is None \
