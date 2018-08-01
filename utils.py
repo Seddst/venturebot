@@ -3,6 +3,7 @@ from telegram.error import TelegramError
 from telegram.ext.dispatcher import run_async
 from typing import Session, Group
 
+Session()
 
 @run_async
 def send_async(bot: Bot, *args, **kwargs):
@@ -11,22 +12,22 @@ def send_async(bot: Bot, *args, **kwargs):
 
     except TelegramError as err:
         bot.logger.error(err.message)
-        session = Session()
-        group = session.query(Group).filter_by(id=kwargs['chat_id']).first()
+        
+        group = Session.query(Group).filter_by(id=kwargs['chat_id']).first()
         if group is not None:
             group.bot_in_group = False
-            session.add(group)
-            session.commit()
+            Session.add(group)
+            Session.commit()
         return None
 
 
 def update_group(grp, session):
     if grp.type in ['group', 'supergroup' 'channel']:
-        group = session.query(Group).filter_by(id=grp.id).first()
+        group = Session.query(Group).filter_by(id=grp.id).first()
         if group is None:
             group = Group(id=grp.id, title=grp.title,
                           username=grp.username)
-            session.add(group)
+            Session.add(group)
 
         else:
             updated = False
@@ -40,8 +41,8 @@ def update_group(grp, session):
                 group.bot_in_group = True
                 updated = True
             if updated:
-                session.add(group)
+                Session.add(group)
 
-        session.commit()
+        Session.commit()
         return group
     return None
