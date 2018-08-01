@@ -314,7 +314,7 @@ def del_adm(bot, chat_id, user):
 
 
 
-def list_admins(self, bot, update):
+def list_admins(bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         update.message.reply_text("access allowed?")  
         admins = Session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
