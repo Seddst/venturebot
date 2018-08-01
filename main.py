@@ -382,7 +382,6 @@ def main():
     dp.add_handler(CommandHandler("help", help_msg))
     dp.add_handler(CommandHandler("admin", admin_panel))
     dp.add_handler(CommandHandler("ping", ping))
-    dp.add_handler(CommandHandler("set_trigger", set_trigger))
     dp.add_handler(CommandHandler("add_trigger", add_trigger))
     dp.add_handler(CommandHandler("del_trigger", del_trigger))
     dp.add_handler(CommandHandler("list_triggers", list_triggers))
