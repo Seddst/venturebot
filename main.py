@@ -88,30 +88,20 @@ def ping(bot: Bot, update: Update):
  #   update.message.reply_text(update.message.text)
       
     
-def add_trigger(bot, update):
+def add_trigger(bot:Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         msg = update.message.text.split(' ', 1)
-        if len(msg) == 2 and len(msg[1]) > 0:
+        if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
             trigger_text = msg[1].strip()
+            data = update.message.reply_to_message
             trigger = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=trigger_text).first()
             if trigger is None: 
-                add_trigger_db(update.message.chat, trigger_text)
+                add_trigger_db(data, update.message.chat, trigger_text)
                 send_async(bot, chat_id=update.message.chat.id,
                            text='The trigger for the phrase "{}" is set.'.format(trigger_text))
             else:
                 send_async(bot, chat_id=update.message.chat.id,
                            text='Trigger "{}" already exists, select another one.'.format(trigger_text))
-        else:
-            send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
-
-        
-def set_trigger(bot, update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):  
-        msg = update.message.text.split(' ', 1)
-        if len(msg) == 2 and len(msg[1]) > 0:
-            trigger = msg[1].strip()
-            add_trigger_db(update.message.chat, trigger)
-            send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger))
         else:
             send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
