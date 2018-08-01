@@ -22,7 +22,7 @@ def send_async(bot: Bot, *args, **kwargs):
 
 
 def update_group(grp):
-    if grp.type in ['group', 'supergroup' 'channel']:
+    if grp.type in ['group']:
         group = Session.query(Group).filter_by(id=grp.id).first()
         if group is None:
             group = Group(id=grp.id, title=grp.title,
