@@ -90,7 +90,6 @@ def ping(bot: Bot, update: Update):
     
 def add_trigger(bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
         msg = update.message.text.split(' ', 1)
         if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
             trigger_text = msg[1].strip()
@@ -108,8 +107,7 @@ def add_trigger(bot, update):
 
         
 def set_trigger(bot, update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):  
         msg = update.message.text.split(' ', 1)
         if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
             trigger = msg[1].strip()
@@ -121,8 +119,7 @@ def set_trigger(bot, update):
 
         
 def del_trigger(bot, update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):  
         msg = update.message.text.split(' ', 1)[1]
         trigger = Session.query(LocalTrigger).filter_by(trigger=msg).first()
         if trigger is not None:
@@ -133,8 +130,7 @@ def del_trigger(bot, update):
             send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
 
         
-def list_triggers(bot, update):
-    
+def list_triggers(bot, update): 
     triggers = Session.query(Trigger).all()
     local_triggers = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
     msg = 'List of current triggers: \n' + \
@@ -184,8 +180,7 @@ def add_trigger_db(msg: Message, chat, trigger_text: str):
 
     
 def set_welcome(bot, update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         if update.message.chat.type in ['group']:
             group = update_group(update.message.chat, session)
             welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
@@ -200,7 +195,6 @@ def set_welcome(bot, update):
 
 def enable_welcome(bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
         if update.message.chat.type in ['group']:
             group = update_group(update.message.chat)
             group.welcome_enabled = True
@@ -211,7 +205,6 @@ def enable_welcome(bot, update):
 
 def disable_welcome(bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
         if update.message.chat.type in ['group']:
             group = update_group(update.message.chat)
             group.welcome_enabled = False
@@ -222,7 +215,6 @@ def disable_welcome(bot, update):
         
 def show_welcome(bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
         if update.message.chat.type in ['group']:
             group = update_group(update.message.chat)
             welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
@@ -236,8 +228,7 @@ def show_welcome(bot, update):
 
 
 def set_admin(bot: Bot, update: Update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         msg = update.message.text.split(' ', 1)[1]
         msg = msg.replace('@', '')
         if msg != '':
@@ -271,8 +262,7 @@ def set_admin(bot: Bot, update: Update):
 
 
 def del_admin(bot, update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         msg = update.message.text.split(' ', 1)[1]
         if msg.find('@') != -1:
             msg = msg.replace('@', '')
@@ -315,8 +305,7 @@ def del_adm(bot, chat_id, user):
 
 
 def list_admins(bot, update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-          
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):  
         admins = Session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
         users = []
         for admin_user in admins:
@@ -333,8 +322,7 @@ def list_admins(bot, update):
 
 
 def ban(self, bot: Bot, update: Update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         username, reason = update.message.text.split(' ', 2)[1:]
         username = username.replace('@', '')
         user = Session.query(User).filter_by(username=username).first()
@@ -365,8 +353,7 @@ def ban(self, bot: Bot, update: Update):
 
 
 def unban(self, bot, update):
-    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         username = update.message.text.split(' ', 1)[1]
         username = username.replace('@', '')
         user = Session.query(User).filter_by(username=username).first()
@@ -391,7 +378,6 @@ def error(self, update, error):
 
 def kick(self, bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        
         bot.leave_chat(update.message.chat.id)
 
 
