@@ -36,9 +36,9 @@ def start(self, update):
                     ' '')
 
 
-def admin_panel(self, update):
-    if update.message.chat.type == ['group']:
-        update.message.reply_text("""Welcome commands:
+def admin_panel(bot: Bot, update: Update):
+    if update.message.chat.type == ['private', 'group']:
+        send_async(bot, chat.id=update.message.chat.id, text=("""Welcome commands:
 /enable_welcome — enable welcome message.
 /disable_welcome — disable welcome message.
 /set_welcome <text> — set welcome message. \
@@ -71,7 +71,7 @@ prevent everyone from pinning - Allow only admins to pin messages
 Reply any message with Pin to Pin it (admins always can do that, other members if its enabled)
 Reply any message with Pin and notify to pin and send notificaion
 Reply any message with Delete to delete it 
-""")
+"""))
 
 
 def help_msg(self, update):
@@ -88,7 +88,7 @@ def ping(bot: Bot, update: Update):
  #   update.message.reply_text(update.message.text)
       
     
-def add_trigger(bot:Bot, update: Update):
+def add_trigger(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         msg = update.message.text.split(' ', 1)
         if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
@@ -128,13 +128,41 @@ def list_triggers(bot, update):
 
 
 def add_trigger_db(msg: Message, chat, trigger_text: str):
+  
     trigger = Session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
     if trigger is None:
         trigger = LocalTrigger()
         trigger.chat_id = chat.id
         trigger.trigger = trigger_text
-  
-        trigger.message = msg.text
+    if Message.audio:
+        trigger.message = Message.audio.file_id
+        trigger.message_type = MessageType.AUDIO.value
+    elif Message.document:
+        trigger.message = Message.document.file_id
+        trigger.message_type = MessageType.DOCUMENT.value
+    elif Message.voice:
+        trigger.message = Message.voice.file_id
+        trigger.message_type = MessageType.VOICE.value
+    elif Message.sticker:
+        trigger.message = Message.sticker.file_id
+        trigger.message_type = MessageType.STICKER.value
+    elif Message.contact:
+        trigger.message = str(Message.contact)
+        trigger.message_type = MessageType.CONTACT.value
+    elif Message.video:
+        trigger.message = Message.video.file_id
+        trigger.message_type = MessageType.VIDEO.value
+    elif Message.video_note:
+        trigger.message = Message.video_note.file_id
+        trigger.message_type = MessageType.VIDEO_NOTE.value
+    elif Message.location:
+        trigger.message = str(Message.location)
+        trigger.message_type = MessageType.LOCATION.value
+    elif Message.photo:
+        trigger.message = Message.photo[-1].file_id
+        trigger.message_type = MessageType.PHOTO.value
+    else:
+        trigger.message = Message.text
         trigger.message_type = MessageType.TEXT.value
     Session.add(trigger)
     Session.commit()
