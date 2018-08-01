@@ -87,70 +87,62 @@ def echo(self, update: Update):
     update.message.reply_text(update.message.text)
       
     
-def trigger_decorator(func):
-    
-    def wrapper(bot, update, Session(), *args, **kwargs):
-        group = update_group(update.message.chat, Session())
-        if group is None \
-                 or \
-                group is not None and \
-                (group.allow_trigger_all or
-                 check_admin(update, Session(), AdminType.GROUP)):
-            func(bot, update, session, *args, **kwargs)
-    return wrapper   
-  
-
-@trigger_decorator  
 def add_trigger(bot, update, session):
-    msg = update.message.text.split(' ', 1)
-    if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
-        trigger_text = msg[1].strip()
-        trigger = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=trigger_text).first()
-        if trigger is None:
-            data = update.message.reply_to_message
-            add_trigger_db(data, update.message.chat, trigger_text, session)
-            send_async(bot, chat_id=update.message.chat.id,
-                       text='The trigger for the phrase "{}" is set.'.format(trigger_text))
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
+        update.message.reply_text("access allowed?")
+        msg = update.message.text.split(' ', 1)
+        if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
+            trigger_text = msg[1].strip()
+            trigger = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=trigger_text).first()
+            if trigger is None:
+                data = update.message.reply_to_message
+                add_trigger_db(data, update.message.chat, trigger_text, session)
+                send_async(bot, chat_id=update.message.chat.id,
+                           text='The trigger for the phrase "{}" is set.'.format(trigger_text))
+            else:
+                send_async(bot, chat_id=update.message.chat.id,
+                           text='Trigger "{}" already exists, select another one.'.format(trigger_text))
         else:
-            send_async(bot, chat_id=update.message.chat.id,
-                       text='Trigger "{}" already exists, select another one.'.format(trigger_text))
-    else:
-        send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
+            send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
         
-@trigger_decorator
 def set_trigger(bot, update, session):
-    msg = update.message.text.split(' ', 1)
-    if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
-        trigger = msg[1].strip()
-        data = update.message.reply_to_message
-        add_trigger_db(data, update.message.chat, trigger, session)
-        send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger))
-    else:
-        send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
+        update.message.reply_text("access allowed?")
+        msg = update.message.text.split(' ', 1)
+        if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
+            trigger = msg[1].strip()
+            data = update.message.reply_to_message
+            add_trigger_db(data, update.message.chat, trigger, session)
+            send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger))
+        else:
+            send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
         
-@trigger_decorator
 def del_trigger(bot, update, session):
-    
-    msg = update.message.text.split(' ', 1)[1]
-    trigger = Session().query(LocalTrigger).filter_by(trigger=msg).first()
-    if trigger is not None:
-        Session().delete(trigger)
-        Session().commit()
-        send_async(bot, chat_id=update.message.chat.id, text='The trigger for "{}" has been deleted.'.format(msg))
-    else:
-        send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
+    if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
+        update.message.reply_text("access allowed?")
+        msg = update.message.text.split(' ', 1)[1]
+        trigger = session.query(LocalTrigger).filter_by(trigger=msg).first()
+        if trigger is not None:
+            session.delete(trigger)
+            session.commit()
+            send_async(bot, chat_id=update.message.chat.id, text='The trigger for "{}" has been deleted.'.format(msg))
+        else:
+            send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
 
         
-@trigger_decorator
-def list_triggers(bot: Bot, update: Update, session):
-    triggers = Session().query(Trigger).all()
-    local_triggers = Session().query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
-    msg = 'List of current triggers: \n' + \
-          '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
-          '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
-    send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
+def list_triggers(bot, update, session):
+    group = update_group(update.message.chat, session)
+    if group is None or \
+            group is not None and \
+            (group.allow_trigger_all or check_admin(update, session, AdminType.GROUP)):
+        triggers = session.query(Trigger).all()
+        local_triggers = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
+        msg = 'List of current triggers: \n' + \
+              '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
+              '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
+        send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
 
 
 def add_trigger_db(msg: Message, chat, trigger_text: str, session):
