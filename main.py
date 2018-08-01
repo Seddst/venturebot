@@ -250,7 +250,7 @@ def set_admin(bot: Bot, update: Update, session):
                            text='No such user')
 
             else:
-                adm = Session().query(Admin).filter_by(user_id=user.id,
+                adm = session().query(Admin).filter_by(user_id=user.id,
                                                      admin_group=update.message.chat.id).first()
 
                 if adm is None:
