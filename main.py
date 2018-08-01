@@ -36,7 +36,7 @@ def start(self, update):
                     ' '')
 
 
-def admin_panel(self, update):
+def admin_panel(update):
     if update.message.chat.type == ['private']:
         update.message.reply_text("""Welcome commands:
 /enable_welcome — enable welcome message.
