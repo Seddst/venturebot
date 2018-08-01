@@ -135,16 +135,12 @@ def del_trigger(bot, update):
         
 def list_triggers(bot, update):
     
-    group = update_group(update.message.chat)
-    if group is None or \
-            group is not None and \
-            (group.allow_trigger_all or check_admin(update, AdminType.GROUP)):
-        triggers = Session.query(Trigger).all()
-        local_triggers = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
-        msg = 'List of current triggers: \n' + \
-              '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
-              '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
-        send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
+    triggers = Session.query(Trigger).all()
+    local_triggers = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
+    msg = 'List of current triggers: \n' + \
+          '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
+          '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
+    send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
 
 
 def add_trigger_db(msg: Message, chat, trigger_text: str, session):
