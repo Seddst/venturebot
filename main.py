@@ -15,7 +15,7 @@ bot.
 from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
-from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, check_admin
+from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, check_admin, Session
 from decorator import get_admin_ids
 from config import TOKEN
 from utils import send_async, update_group
@@ -132,7 +132,8 @@ def del_trigger(bot, update, session):
             send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
 
         
-def list_triggers(bot, update, session):
+def list_triggers(bot, update):
+    session = Session
     group = update_group(update.message.chat, session)
     if group is None or \
             group is not None and \
