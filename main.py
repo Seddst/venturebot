@@ -37,7 +37,7 @@ def start(self, update):
 
 
 def admin_panel(update):
-    if update.message.chat.type == ['private']:
+    if update.message.chat.type == ['group']:
         update.message.reply_text("""Welcome commands:
 /enable_welcome — enable welcome message.
 /disable_welcome — disable welcome message.
