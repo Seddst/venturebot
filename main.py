@@ -135,7 +135,7 @@ def del_trigger(bot, update):
         
 def list_triggers(bot, update):
     
-    group = update_group(update.message.chat, session)
+    group = update_group(update.message.chat)
     if group is None or \
             group is not None and \
             (group.allow_trigger_all or check_admin(update, session, AdminType.GROUP)):
