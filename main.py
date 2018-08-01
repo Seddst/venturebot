@@ -36,7 +36,7 @@ def start(self, update):
                     ' '')
 
 
-def admin_panel(update):
+def admin_panel(self, update):
     if update.message.chat.type == ['group']:
         update.message.reply_text("""Welcome commands:
 /enable_welcome — enable welcome message.
@@ -133,32 +133,7 @@ def add_trigger_db(msg: Message, chat, trigger_text: str):
         trigger = LocalTrigger()
         trigger.chat_id = chat.id
         trigger.trigger = trigger_text
-    
-    if msg.document:
-        trigger.message = msg.document.file_id
-        trigger.message_type = MessageType.DOCUMENT.value
-    elif msg.voice:
-        trigger.message = msg.voice.file_id
-        trigger.message_type = MessageType.VOICE.value
-    elif msg.sticker:
-        trigger.message = msg.sticker.file_id
-        trigger.message_type = MessageType.STICKER.value
-    elif msg.contact:
-        trigger.message = str(msg.contact)
-        trigger.message_type = MessageType.CONTACT.value
-    elif msg.video:
-        trigger.message = msg.video.file_id
-        trigger.message_type = MessageType.VIDEO.value
-    elif msg.video_note:
-        trigger.message = msg.video_note.file_id
-        trigger.message_type = MessageType.VIDEO_NOTE.value
-    elif msg.location:
-        trigger.message = str(msg.location)
-        trigger.message_type = MessageType.LOCATION.value
-    elif msg.photo:
-        trigger.message = msg.photo[-1].file_id
-        trigger.message_type = MessageType.PHOTO.value
-    else:
+  
         trigger.message = msg.text
         trigger.message_type = MessageType.TEXT.value
     Session.add(trigger)
