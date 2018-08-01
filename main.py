@@ -137,8 +137,8 @@ def list_triggers(bot, update, session):
     if group is None or \
             group is not None and \
             (group.allow_trigger_all or check_admin(update, session, AdminType.GROUP)):
-        triggers = session.query(Trigger).all()
-        local_triggers = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
+        triggers = Session().query(Trigger).all()
+        local_triggers = Session().query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
         msg = 'List of current triggers: \n' + \
               '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
               '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
