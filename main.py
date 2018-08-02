@@ -145,8 +145,8 @@ def add_trigger_db(message, chat, trigger_text: str):
         trigger = LocalTrigger()
         trigger.chat_id = chat.id
         trigger.trigger = trigger_text
-    if msg.Audio:
-        trigger.message = msg.Audio.file_id
+    if msg.audio:
+        trigger.message = msg.audio.file_id
         trigger.message_type = MessageType.AUDIO.value
     elif msg.Document:
         trigger.message = msg.Document.file_id
