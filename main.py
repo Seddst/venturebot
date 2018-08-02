@@ -140,10 +140,10 @@ def list_triggers(bot, update):
 
 def add_trigger_db(msg: Message, trigger_text: str):
     
-    trigger = Session.query(Trigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
+    trigger = Session.query(Trigger).filter_by(trigger=trigger_text).first()
     if trigger is None:
         trigger = Trigger()
-        
+   
         trigger.trigger = trigger_text
     if msg.audio:
         trigger.message = msg.audio.file_id
@@ -152,7 +152,6 @@ def add_trigger_db(msg: Message, trigger_text: str):
         trigger.message = msg.document.file_id
         trigger.message_type = MessageType.DOCUMENT.value
     elif msg.voice:
-      
         trigger.message = msg.voice.file_id
         trigger.message_type = MessageType.VOICE.value
     elif msg.sticker:
@@ -162,7 +161,6 @@ def add_trigger_db(msg: Message, trigger_text: str):
         trigger.message = str(msg.contact)
         trigger.message_type = MessageType.CONTACT.value
     elif msg.video:
-      
         trigger.message = msg.video.file_id
         trigger.message_type = MessageType.VIDEO.value
     elif msg.video_note:
