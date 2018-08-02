@@ -87,7 +87,57 @@ def ping(bot: Bot, update: Update):
   #  """Echo the user message."""
  #   update.message.reply_text(update.message.text)
       
-    
+        
+def list_triggers(bot, update): 
+    triggers = Session.query(Trigger).all()
+    local_triggers = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
+    msg = 'List of current triggers: \n' + \
+          '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
+          '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
+    send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
+
+
+def add_trigger_db(msg: Message, chat, trigger_text: str):
+      
+    trigger = Session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
+    if trigger is None:
+        trigger = LocalTrigger()
+        trigger.chat_id = chat.id
+        trigger.trigger = trigger_text
+    if msg.audio:
+        trigger.message = msg.audio.file_id
+        trigger.message_type = MessageType.AUDIO.value
+    elif msg.document:
+        trigger.message = msg.document.file_id
+        trigger.message_type = MessageType.DOCUMENT.value
+    elif msg.voice:
+        trigger.message = msg.voice.file_id
+        trigger.message_type = MessageType.VOICE.value
+    elif msg.sticker:
+        trigger.message = msg.sticker.file_id
+        trigger.message_type = MessageType.STICKER.value
+    elif msg.contact:
+        trigger.message = str(msg.contact)
+        trigger.message_type = MessageType.CONTACT.value
+    elif msg.video:
+        trigger.message = msg.video.file_id
+        trigger.message_type = MessageType.VIDEO.value
+    elif msg.video_note:
+        trigger.message = msg.video_note.file_id
+        trigger.message_type = MessageType.VIDEO_NOTE.value
+    elif msg.location:
+        trigger.message = str(msg.location)
+        trigger.message_type = MessageType.LOCATION.value
+    elif msg.photo:
+        trigger.message = msg.photo[-1].file_id
+        trigger.message_type = MessageType.PHOTO.value
+    else:
+        trigger.message = msg.text
+        trigger.message_type = MessageType.TEXT.value
+    Session.add(trigger)
+    Session.commit()
+
+ 
 def add_trigger(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         msg = update.message.text.split(' ', 1)
@@ -114,58 +164,8 @@ def del_trigger(bot, update):
             Session.commit()
             send_async(bot, chat_id=update.message.chat.id, text='The trigger for "{}" has been deleted.'.format(msg))
         else:
-            send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')
-
-        
-def list_triggers(bot, update): 
-    triggers = Session.query(Trigger).all()
-    local_triggers = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
-    msg = 'List of current triggers: \n' + \
-          '<b>Global:</b>\n' + ('\n'.join([trigger.trigger for trigger in triggers]) or '[Empty]\n') + \
-          '\n<b>Local:</b>\n' + ('\n'.join([trigger.trigger for trigger in local_triggers]) or '[Empty]\n')
-    send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
-
-
-def add_trigger_db(msg: Message, trigger_text: str):
-    msg = Message  
-    trigger = Session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
-    if trigger is None:
-        trigger = LocalTrigger()
-        trigger.chat_id = chat.id
-        trigger.trigger = trigger_text
-    if msg.audio:
-        trigger.message = Message.audio.file_id
-        trigger.message_type = MessageType.AUDIO.value
-    elif msg.document:
-        trigger.message = Message.document.file_id
-        trigger.message_type = MessageType.DOCUMENT.value
-    elif msg.voice:
-        trigger.message = Message.voice.file_id
-        trigger.message_type = MessageType.VOICE.value
-    elif msg.sticker:
-        trigger.message = Message.sticker.file_id
-        trigger.message_type = MessageType.STICKER.value
-    elif msg.contact:
-        trigger.message = str(Message.contact)
-        trigger.message_type = MessageType.CONTACT.value
-    elif msg.video:
-        trigger.message = Message.video.file_id
-        trigger.message_type = MessageType.VIDEO.value
-    elif msg.video_note:
-        trigger.message = Message.video_note.file_id
-        trigger.message_type = MessageType.VIDEO_NOTE.value
-    elif msg.location:
-        trigger.message = str(Message.location)
-        trigger.message_type = MessageType.LOCATION.value
-    elif msg.photo:
-        trigger.message = Message.photo[-1].file_id
-        trigger.message_type = MessageType.PHOTO.value
-    else:
-        trigger.message = Message.text
-        trigger.message_type = MessageType.TEXT.value
-    Session.add(trigger)
-    Session.commit()
-
+            send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')    
+    
     
 def set_welcome(bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
