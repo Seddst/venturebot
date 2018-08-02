@@ -37,8 +37,8 @@ def start(self, update):
 
 
 def admin_panel(bot: Bot, update: Update):
-    if update.message.chat.type == ['private', 'group']:
-        send_async(bot, chat_id=update.message.chat.id, text=("""Welcome commands:
+    
+     send_async(bot, chat_id=update.message.chat.id, text=("""Welcome commands:
 /enable_welcome — enable welcome message.
 /disable_welcome — disable welcome message.
 /set_welcome <text> — set welcome message. \
