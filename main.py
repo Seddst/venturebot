@@ -138,17 +138,17 @@ def list_triggers(bot, update):
     send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
 
 
-def add_trigger_db(msg: Message, chat, trigger_text: str, update):
+def add_trigger_db(msg: Message, chat, trigger_text: str):
       
     trigger = Session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
     if trigger is None:
         trigger = LocalTrigger()
         trigger.chat_id = chat.id
         trigger.trigger = trigger_text
-    if update.msg.audio:
+    if msg.audio:
         trigger.message = msg.audio.file_id
         trigger.message_type = MessageType.AUDIO.value
-    elif telegram.document:
+    elif msg.document:
         trigger.message = msg.document.file_id
         trigger.message_type = MessageType.DOCUMENT.value
     elif msg.voice:
@@ -183,7 +183,7 @@ def set_trigger(bot: Bot, update: Update, session):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
         trigger = msg[1].strip()
-        data = update.message.reply_to_message
+        data = Message
         add_trigger_db(data, update.message.chat, trigger, session)
         send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger))
     else:
@@ -197,7 +197,7 @@ def add_trigger(bot: Bot, update: Update):
             trigger_text = msg[1].strip()
             trigger = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=trigger_text).first()
             if trigger is None:
-                data = update.message.reply_to_message
+                data = Message
                 add_trigger_db(data, update.message.chat, trigger_text, update)
                 send_async(bot, chat_id=update.message.chat.id,
                            text='The trigger for the phrase "{}" is set.'.format(trigger_text))
