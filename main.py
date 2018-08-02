@@ -91,12 +91,11 @@ def ping(bot: Bot, update: Update):
 def add_trigger(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         msg = update.message.text.split(' ', 1)
-        if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
+        if len(msg) == 2 and len(msg[1]) > 0:
             trigger_text = msg[1].strip()
-            data = update.message.reply_to_message
             trigger = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=trigger_text).first()
             if trigger is None: 
-                add_trigger_db(data, update.message.chat, trigger_text)
+                add_trigger_db(update.message.chat, trigger_text)
                 send_async(bot, chat_id=update.message.chat.id,
                            text='The trigger for the phrase "{}" is set.'.format(trigger_text))
             else:
@@ -127,38 +126,38 @@ def list_triggers(bot, update):
     send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
 
 
-def add_trigger_db(msg: Message, chat, trigger_text: str):
-  
+def add_trigger_db(chat, trigger_text: str):
+    msg = Message  
     trigger = Session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
     if trigger is None:
         trigger = LocalTrigger()
         trigger.chat_id = chat.id
         trigger.trigger = trigger_text
-    if Message.audio:
+    if msg.audio:
         trigger.message = Message.audio.file_id
         trigger.message_type = MessageType.AUDIO.value
-    elif Message.document:
+    elif msg.document:
         trigger.message = Message.document.file_id
         trigger.message_type = MessageType.DOCUMENT.value
-    elif Message.voice:
+    elif msg.voice:
         trigger.message = Message.voice.file_id
         trigger.message_type = MessageType.VOICE.value
-    elif Message.sticker:
+    elif msg.sticker:
         trigger.message = Message.sticker.file_id
         trigger.message_type = MessageType.STICKER.value
-    elif Message.contact:
+    elif msg.contact:
         trigger.message = str(Message.contact)
         trigger.message_type = MessageType.CONTACT.value
-    elif Message.video:
+    elif msg.video:
         trigger.message = Message.video.file_id
         trigger.message_type = MessageType.VIDEO.value
-    elif Message.video_note:
+    elif msg.video_note:
         trigger.message = Message.video_note.file_id
         trigger.message_type = MessageType.VIDEO_NOTE.value
-    elif Message.location:
+    elif msg.location:
         trigger.message = str(Message.location)
         trigger.message_type = MessageType.LOCATION.value
-    elif Message.photo:
+    elif msg.photo:
         trigger.message = Message.photo[-1].file_id
         trigger.message_type = MessageType.PHOTO.value
     else:
