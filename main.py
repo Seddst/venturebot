@@ -15,6 +15,7 @@ bot.
 from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
+from json import loads
 from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, check_admin, Session
 from decorator import get_admin_ids
 from config import TOKEN
@@ -87,7 +88,47 @@ def ping(bot: Bot, update: Update):
   #  """Echo the user message."""
  #   update.message.reply_text(update.message.text)
 
-        
+
+def trigger_show(bot: Bot, update: Update, session):
+    trigger = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=update.message.text).first()
+    if trigger is None:
+        trigger = session.query(Trigger).filter_by(trigger=update.message.text).first()
+    if trigger is not None:
+        if trigger.message_type == MessageType.AUDIO.value:
+            bot.send_audio(update.message.chat.id, trigger.message)
+        elif trigger.message_type == MessageType.DOCUMENT.value:
+            bot.send_document(update.message.chat.id, trigger.message)
+        elif trigger.message_type == MessageType.VOICE.value:
+            bot.send_voice(update.message.chat.id, trigger.message)
+        elif trigger.message_type == MessageType.STICKER.value:
+            bot.send_sticker(update.message.chat.id, trigger.message)
+        elif trigger.message_type == MessageType.CONTACT.value:
+            msg = trigger.message.replace('\'', '"')
+            contact = loads(msg)
+            if 'phone_number' not in contact.keys():
+                contact['phone_number'] = None
+            if 'first_name' not in contact.keys():
+                contact['first_name'] = None
+            if 'last_name' not in contact.keys():
+                contact['last_name'] = None
+            bot.send_contact(update.message.chat.id,
+                             contact['phone_number'],
+                             contact['first_name'],
+                             contact['last_name'])
+        elif trigger.message_type == MessageType.VIDEO.value:
+            bot.send_video(update.message.chat.id, trigger.message)
+        elif trigger.message_type == MessageType.VIDEO_NOTE.value:
+            bot.send_video_note(update.message.chat.id, trigger.message)
+        elif trigger.message_type == MessageType.LOCATION.value:
+            msg = trigger.message.replace('\'', '"')
+            location = loads(msg)
+            bot.send_location(update.message.chat.id, location['latitude'], location['longitude'])
+        elif trigger.message_type == MessageType.PHOTO.value:
+            bot.send_photo(update.message.chat.id, trigger.message)
+        else:
+            send_async(bot, chat_id=update.message.chat.id, text=trigger.message, disable_web_page_preview=True)
+
+            
 def list_triggers(bot, update): 
     triggers = Session.query(Trigger).all()
     local_triggers = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id).all()
@@ -383,6 +424,7 @@ def main():
     dp.add_handler(CommandHandler("help", help_msg))
     dp.add_handler(CommandHandler("admin", admin_panel))
     dp.add_handler(CommandHandler("ping", ping))
+    dp.add_handler(CommandHandler("trigger_show", trigger_show))
     dp.add_handler(CommandHandler("add_trigger", add_trigger))
     dp.add_handler(CommandHandler("del_trigger", del_trigger))
     dp.add_handler(CommandHandler("list_triggers", list_triggers))
