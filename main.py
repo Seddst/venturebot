@@ -198,7 +198,7 @@ def add_trigger(bot: Bot, update: Update):
             trigger = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=trigger_text).first()
             if trigger is None:
                 data = update.message.reply_to_message
-                add_trigger_db(data, update.message.chat, trigger_text)
+                add_trigger_db(data, update.message.chat, trigger_text, update)
                 send_async(bot, chat_id=update.message.chat.id,
                            text='The trigger for the phrase "{}" is set.'.format(trigger_text))
             else:
@@ -208,7 +208,7 @@ def add_trigger(bot: Bot, update: Update):
             send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')
 
         
-def del_trigger(bot, update):
+def del_trigger(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):  
         msg = update.message.text.split(' ', 1)[1]
         trigger = Session.query(LocalTrigger).filter_by(trigger=msg).first()
@@ -220,7 +220,7 @@ def del_trigger(bot, update):
             send_async(bot, chat_id=update.message.chat.id, text='Where did you see such a trigger? 0_o')    
     
     
-def set_welcome(bot, update):
+def set_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         if update.message.chat.type in ['group']:
             group = update_group(update.message.chat, session)
@@ -234,7 +234,7 @@ def set_welcome(bot, update):
             send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
 
 
-def enable_welcome(bot, update):
+def enable_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         if update.message.chat.type in ['group']:
             group = update_group(update.message.chat)
@@ -244,7 +244,7 @@ def enable_welcome(bot, update):
             send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
 
-def disable_welcome(bot, update):
+def disable_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         if update.message.chat.type in ['group']:
             group = update_group(update.message.chat)
@@ -254,7 +254,7 @@ def disable_welcome(bot, update):
             send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
 
         
-def show_welcome(bot, update):
+def show_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         if update.message.chat.type in ['group']:
             group = update_group(update.message.chat)
@@ -302,7 +302,7 @@ def set_admin(bot: Bot, update: Update):
 
 
 
-def del_admin(bot, update):
+def del_admin(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         msg = update.message.text.split(' ', 1)[1]
         if msg.find('@') != -1:
@@ -345,7 +345,7 @@ def del_adm(bot, chat_id, user):
 
 
 
-def list_admins(bot, update):
+def list_admins(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):  
         admins = Session.query(Admin).filter(Admin.admin_group == update.message.chat.id).all()
         users = []
@@ -362,7 +362,7 @@ def list_admins(bot, update):
 
 
 
-def ban(self, bot: Bot, update: Update):
+def ban(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         username, reason = update.message.text.split(' ', 2)[1:]
         username = username.replace('@', '')
@@ -393,7 +393,7 @@ def ban(self, bot: Bot, update: Update):
 
 
 
-def unban(self, bot, update):
+def unban(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         username = update.message.text.split(' ', 1)[1]
         username = username.replace('@', '')
