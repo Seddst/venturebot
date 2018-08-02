@@ -178,6 +178,17 @@ def add_trigger_db(msg: Message, chat, trigger_text: str):
     Session.add(trigger)
     Session.commit()
 
+    
+def set_trigger(bot: Bot, update: Update, session):
+    msg = update.message.text.split(' ', 1)
+    if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
+        trigger = msg[1].strip()
+        data = update.message.reply_to_message
+        add_trigger_db(data, update.message.chat, trigger, session)
+        send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger))
+    else:
+        send_async(bot, chat_id=update.message.chat.id, text='Your thoughts are not clear, try one more time')    
+    
  
 def add_trigger(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
@@ -425,6 +436,7 @@ def main():
     dp.add_handler(CommandHandler("admin", admin_panel))
     dp.add_handler(CommandHandler("ping", ping))
     dp.add_handler(CommandHandler("trigger_show", trigger_show))
+    dp.add_handler(CommandHandler("set_trigger", set_trigger))
     dp.add_handler(CommandHandler("add_trigger", add_trigger))
     dp.add_handler(CommandHandler("del_trigger", del_trigger))
     dp.add_handler(CommandHandler("list_triggers", list_triggers))
