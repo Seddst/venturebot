@@ -86,7 +86,7 @@ def ping(bot: Bot, update: Update):
 # def echo(self, update: Update):
   #  """Echo the user message."""
  #   update.message.reply_text(update.message.text)
-      
+
         
 def list_triggers(bot, update): 
     triggers = Session.query(Trigger).all()
@@ -141,7 +141,7 @@ def add_trigger_db(msg: Message, chat, trigger_text: str):
 def add_trigger(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         msg = update.message.text.split(' ', 1)
-        if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
+        if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
             trigger_text = msg[1].strip()
             trigger = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=trigger_text).first()
             if trigger is None:
