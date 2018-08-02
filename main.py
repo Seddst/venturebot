@@ -126,7 +126,7 @@ def list_triggers(bot, update):
     send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
 
 
-def add_trigger_db(chat, trigger_text: str):
+def add_trigger_db(msg: Message, trigger_text: str):
     msg = Message  
     trigger = Session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
     if trigger is None:
