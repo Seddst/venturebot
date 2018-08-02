@@ -1,4 +1,5 @@
 python-telegram-bot
+telegram
 PyMySQL
 SQLAlchemy==1.2.10
 psycopg2-binary
