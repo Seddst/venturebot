@@ -13,7 +13,6 @@ Press Ctrl-C on the command line or send a signal to the process to stop the
 bot.
 """
 from datetime import datetime
-from telegram import Telegram
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 from json import loads
