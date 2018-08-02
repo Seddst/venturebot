@@ -89,10 +89,10 @@ def ping(bot: Bot, update: Update):
  #   update.message.reply_text(update.message.text)
 
 
-def trigger_show(bot: Bot, update: Update, session):
-    trigger = session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=update.message.text).first()
+def trigger_show(bot: Bot, update: Update):
+    trigger = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=update.message.text).first()
     if trigger is None:
-        trigger = session.query(Trigger).filter_by(trigger=update.message.text).first()
+        trigger = Session.query(Trigger).filter_by(trigger=update.message.text).first()
     if trigger is not None:
         if trigger.message_type == MessageType.AUDIO.value:
             bot.send_audio(update.message.chat.id, trigger.message)
