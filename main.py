@@ -141,11 +141,12 @@ def add_trigger_db(msg: Message, chat, trigger_text: str):
 def add_trigger(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         msg = update.message.text.split(' ', 1)
-        if len(msg) == 2 and len(msg[1]) > 0:
+        if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
             trigger_text = msg[1].strip()
             trigger = Session.query(LocalTrigger).filter_by(chat_id=update.message.chat.id, trigger=trigger_text).first()
-            if trigger is None: 
-                add_trigger_db(update.message.chat, trigger_text)
+            if trigger is None:
+                data = update.message.reply_to_message
+                add_trigger_db(data, update.message.chat, trigger_text)
                 send_async(bot, chat_id=update.message.chat.id,
                            text='The trigger for the phrase "{}" is set.'.format(trigger_text))
             else:
