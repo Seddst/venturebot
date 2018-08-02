@@ -138,17 +138,17 @@ def list_triggers(bot, update):
     send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
 
 
-def add_trigger_db(message, chat, trigger_text: str):
-    msg = message  
+def add_trigger_db(msg: Message, chat, trigger_text: str):
+      
     trigger = Session.query(LocalTrigger).filter_by(chat_id=chat.id, trigger=trigger_text).first()
     if trigger is None:
         trigger = LocalTrigger()
         trigger.chat_id = chat.id
         trigger.trigger = trigger_text
-    if msg.audio:
+    if update.msg.audio:
         trigger.message = msg.audio.file_id
         trigger.message_type = MessageType.AUDIO.value
-    elif msg.Document:
+    elif telegram.Document:
         trigger.message = msg.Document.file_id
         trigger.message_type = MessageType.DOCUMENT.value
     elif msg.Voice:
