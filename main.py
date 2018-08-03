@@ -427,7 +427,6 @@ def kick(self, bot, update):
 
         
 @run_async
-@user_allowed
 def manage_all(bot: Bot, update: Update):
     if update.message.reply_to_message is not None:
         trigger_show(bot, update)        
