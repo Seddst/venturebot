@@ -20,7 +20,8 @@ from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageT
 from decorator import get_admin_ids
 from config import TOKEN
 from utils import send_async, update_group
-from telegram import Update, Bot, Message, ParseMode 
+from telegram import (Update, Bot, Message, ParseMode, Audio, Document, Voice, Sticker, 
+Contact, Video, VideoNote, Location, ChatPhoto, InputTextMessageContent)
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -143,7 +144,36 @@ def add_trigger_db(msg: Message, trigger_text: str):
     trigger = Session.query(Trigger).filter_by(trigger=trigger_text).first()
     if trigger is None:
         trigger = Trigger()
-   
+    if Audio:
+        trigger.message = msg.audio.file_id
+        trigger.message_type = MessageType.AUDIO.value
+    elif Document:
+        trigger.message = msg.document.file_id
+        trigger.message_type = MessageType.DOCUMENT.value
+    elif Voice:
+        trigger.message = msg.voice.file_id
+        trigger.message_type = MessageType.VOICE.value
+    elif Sticker:
+        trigger.message = msg.sticker.file_id
+        trigger.message_type = MessageType.STICKER.value
+    elif Contact:
+        trigger.message = str(msg.contact)
+        trigger.message_type = MessageType.CONTACT.value
+    elif Video:
+        trigger.message = msg.video.file_id
+        trigger.message_type = MessageType.VIDEO.value
+    elif VideoNote:
+        trigger.message = msg.video_note.file_id
+        trigger.message_type = MessageType.VIDEO_NOTE.value
+    elif Location:
+        trigger.message = str(msg.location)
+        trigger.message_type = MessageType.LOCATION.value
+    elif ChatPhoto:
+        trigger.message = msg.photo[-1].file_id
+        trigger.message_type = MessageType.PHOTO.value
+    else:
+        trigger.message = InputTextMessageContent
+        trigger.message_type = MessageType.TEXT.value
         trigger.trigger = trigger_text
    
     Session.add(trigger)
