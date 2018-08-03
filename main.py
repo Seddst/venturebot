@@ -20,7 +20,7 @@ from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageT
 from decorator import get_admin_ids
 from config import TOKEN
 from utils import send_async, update_group
-from telegram import (Update, Bot, Message, ParseMode, Audio, Document, Voice, Sticker, 
+from telegram import (Bot, Message, ParseMode, Update Audio, Document, Voice, Sticker, 
 Contact, Video, VideoNote, Location, ChatPhoto, InputTextMessageContent)
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
