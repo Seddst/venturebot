@@ -1,6 +1,8 @@
 python-telegram-bot
 telegram
 PyMySQL
+future>=0.16.0
+certifi
 SQLAlchemy==1.2.10
 psycopg2-binary
 django
