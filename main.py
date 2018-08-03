@@ -22,6 +22,9 @@ from config import TOKEN
 from utils import send_async, update_group
 from telegram import (Bot, Message, ParseMode, Update Audio, Document, Voice, Sticker, 
 Contact, Video, VideoNote, Location, ChatPhoto, InputTextMessageContent)
+from telegram.ext.dispatcher import run_async
+
+
 # Enable logging
 logging.basicConfig(format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
                     level=logging.INFO)
@@ -418,11 +421,17 @@ def error(self, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
-
 def kick(self, bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         bot.leave_chat(update.message.chat.id)
 
+        
+@run_async
+@user_allowed
+def manage_all(bot: Bot, update: Update):
+    if update.message.reply_to_message is not None:
+        trigger_show(bot, update)        
+        
 
 def main():
     """Start the bot."""
