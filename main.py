@@ -144,38 +144,39 @@ def add_trigger_db(msg: Message, trigger_text: str):
     trigger = Session.query(Trigger).filter_by(trigger=trigger_text).first()
     if trigger is None:
         trigger = Trigger()
-    if Audio:
+        trigger.trigger = trigger_text
+        
+    if msg.audio:
         trigger.message = msg.audio.file_id
         trigger.message_type = MessageType.AUDIO.value
-    elif Document:
+    elif msg.document:
         trigger.message = msg.document.file_id
         trigger.message_type = MessageType.DOCUMENT.value
-    elif Voice:
+    elif msg.voice:
         trigger.message = msg.voice.file_id
         trigger.message_type = MessageType.VOICE.value
-    elif Sticker:
+    elif msg.sticker:
         trigger.message = msg.sticker.file_id
         trigger.message_type = MessageType.STICKER.value
-    elif Contact:
+    elif msg.contact:
         trigger.message = str(msg.contact)
         trigger.message_type = MessageType.CONTACT.value
-    elif Video:
+    elif msg.video:
         trigger.message = msg.video.file_id
         trigger.message_type = MessageType.VIDEO.value
-    elif VideoNote:
+    elif msg.video_note:
         trigger.message = msg.video_note.file_id
         trigger.message_type = MessageType.VIDEO_NOTE.value
-    elif Location:
+    elif msg.location:
         trigger.message = str(msg.location)
         trigger.message_type = MessageType.LOCATION.value
-    elif ChatPhoto:
+    elif msg.photo:
         trigger.message = msg.photo[-1].file_id
         trigger.message_type = MessageType.PHOTO.value
     else:
-        trigger.message = InputTextMessageContent
+        trigger.message = msg.text
         trigger.message_type = MessageType.TEXT.value
-        trigger.trigger = trigger_text
-   
+               
     Session.add(trigger)
     Session.commit()
 
