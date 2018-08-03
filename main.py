@@ -150,7 +150,7 @@ def add_trigger_db(msg: Message, trigger_text: str):
     Session.commit()
 
     
-def set_trigger(bot: Bot, update: Update, session):
+def set_trigger(bot: Bot, update: Update):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
         trigger = msg[1].strip()
