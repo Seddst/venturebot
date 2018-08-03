@@ -186,7 +186,7 @@ def add_trigger_db(msg: Message, trigger_text: str):
     
 def set_trigger(bot: Bot, update: Update):
     msg = update.message.text.split(' ', 1)
-    if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message.message_id:
+    if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
         trigger = msg[1].strip()
         data = update.message.reply_to_message
         add_trigger_db(data, trigger)
@@ -198,7 +198,7 @@ def set_trigger(bot: Bot, update: Update):
 def add_trigger(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         msg = update.message.text.split(' ', 1)
-        if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message.chat_id:
+        if len(msg) == 2 and len(msg[1]) > 0 and update.message.reply_to_message:
             trigger_text = msg[1].strip()
             trigger = Session.query(Trigger).filter_by(trigger=trigger_text).first()
             if trigger is None:
