@@ -185,7 +185,7 @@ def set_trigger(bot: Bot, update: Update):
     msg = update.message.text.split(' ', 1)
     if len(msg) == 2 and len(msg[1]) > 0 or update.message.reply_to_message:
         trigger = msg[1].strip()
-        data = Message
+        data = update.message.reply_to_message
         add_trigger_db(data, trigger)
         send_async(bot, chat_id=update.message.chat.id, text='The trigger for the phrase "{}" is set.'.format(trigger))
     else:
@@ -199,7 +199,7 @@ def add_trigger(bot: Bot, update: Update):
             trigger_text = msg[1].strip()
             trigger = Session.query(Trigger).filter_by(trigger=trigger_text).first()
             if trigger is None:
-                data = Message
+                data = update.message.reply_to_message
                 add_trigger_db(data, trigger_text)
                 send_async(bot, chat_id=update.message.chat.id,
                            text='The trigger for the phrase "{}" is set.'.format(trigger_text))
