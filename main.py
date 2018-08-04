@@ -279,14 +279,14 @@ def set_admin(bot: Bot, update: Update):
         msg = update.message.text.split(' ', 1)[1]
         msg = msg.replace('@', '')
         if msg != '':
-            Session.query(User).filter_by(id=update.message.from_user.id).first()
-            user = Session.query(User).filter_by(username=msg).first()
-            if user is None:
-                send_async(bot,
-                           chat_id=update.message.chat.id,
-                           text='No such user')
+            #Session.query(User).filter_by(id=update.message.from_user.id).first()
+            #user = Session.query(User).filter_by(username=msg).first()
+            #if user is None:
+                #send_async(bot,
+                           #chat_id=update.message.chat.id,
+                           #text='No such user')
 
-            else:
+            #else:
                 adm = Session.query(Admin).filter_by(user_id=user.id,
                                                      admin_group=update.message.chat.id).first()
 
