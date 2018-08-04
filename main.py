@@ -229,7 +229,7 @@ def del_trigger(bot: Bot, update: Update):
 def set_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
         if update.message.chat.type in ['group']:
-            group = update_group(update.message.chat, session)
+            group = update_group(update.message.chat)
             welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
             if welcome_msg is None:
                 welcome_msg = WelcomeMsg(chat_id=group.id, message=update.message.text.split(' ', 1)[1])
