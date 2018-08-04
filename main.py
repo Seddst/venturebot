@@ -279,6 +279,7 @@ def set_admin(bot: Bot, update: Update):
         msg = update.message.text.split(' ', 1)[1]
         msg = msg.replace('@', '')
         if msg != '':
+          Session.query(User).filter_by(id=update.message.from_user.id).first()
             user = Session.query(User).filter_by(username=msg).first()
             if user is None:
                 send_async(bot,
