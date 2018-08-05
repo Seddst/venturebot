@@ -291,22 +291,22 @@ def set_admin(bot: Bot, update: Update):
             adm = Session.query(Admin).filter_by(user_id=user.id,
                                                      admin_group=update.message.chat.id).first()
 
-             if adm is None:
-                 new_group_admin = Admin(user_id=user.id,
+            if adm is None:
+                new_group_admin = Admin(user_id=user.id,
                                             admin_type=AdminType.GROUP.value,
                                             admin_group=update.message.chat.id)
 
-                 Session.add(new_group_admin)
-                 Session.commit()
-                 send_async(bot,
-                            chat_id=update.message.chat.id,
-                            text="""Welcome our new administrator: @{}!
+                Session.add(new_group_admin)
+                Session.commit()
+                send_async(bot,
+                           chat_id=update.message.chat.id,
+                           text="""Welcome our new administrator: @{}!
     Check the commands list with /help command""".format(user.username))
 
-             else:
-                 send_async(bot,
-                            chat_id=update.message.chat.id,
-                            text='@{} already has administrator rights'.format(user.username))
+            else:
+                send_async(bot,
+                           chat_id=update.message.chat.id,
+                           text='@{} already has administrator rights'.format(user.username))
 
 
 
