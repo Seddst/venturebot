@@ -279,7 +279,7 @@ def set_admin(bot: Bot, update: Update):
         msg = update.message.text.split(' ', 1)[1]
         msg = msg.replace('@', '')
         if msg != '':
-            bot.getChatMember(update.message.chat_id, str(update.message.new_chat_members.username))
+            bot.getChatMember(update.message.chat_id, str(update.message.user.username))
             user = Session.query(User).filter_by(username=msg).first()
             
             if user is None:
