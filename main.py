@@ -424,7 +424,7 @@ def error(self, update, error):
     logger.warning('Update "%s" caused error "%s"', update, error)
 
 
-def kick(self, bot, update):
+def kick(bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
         bot.leave_chat(update.message.chat.id)
 
