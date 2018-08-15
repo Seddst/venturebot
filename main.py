@@ -228,7 +228,7 @@ def del_trigger(bot: Bot, update: Update):
     
 def set_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
-        if update.message.chat.type in ['group']:
+        if update.message.chat.type in ['group'] or ['supergroup']:
             group = update_group(update.message.chat)
             welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
             if welcome_msg is None:
@@ -242,7 +242,7 @@ def set_welcome(bot: Bot, update: Update):
 
 def enable_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        if update.message.chat.type in ['group']:
+        if update.message.chat.type in ['group'] or ['supergroup']:
             group = update_group(update.message.chat)
             group.welcome_enabled = True
             Session.add(group)
@@ -252,7 +252,7 @@ def enable_welcome(bot: Bot, update: Update):
 
 def disable_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        if update.message.chat.type in ['group']:
+        if update.message.chat.type in ['group'] or ['supergroup']:
             group = update_group(update.message.chat)
             group.welcome_enabled = False
             Session.add(group)
@@ -262,7 +262,7 @@ def disable_welcome(bot: Bot, update: Update):
         
 def show_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        if update.message.chat.type in ['group', 'supergroup']:
+        if update.message.chat.type in ['group'] or ['supergroup']:
             group = update_group(update.message.chat)
             welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
             if welcome_msg is None:
