@@ -228,49 +228,49 @@ def del_trigger(bot: Bot, update: Update):
     
 def set_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id): 
-        if update.message.chat.type in ['group'] or ['supergroup']:
-            group = update_group(update.message.chat)
-            welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
-            if welcome_msg is None:
-                welcome_msg = WelcomeMsg(chat_id=group.id, message=update.message.text.split(' ', 1)[1])
-            else:
-                welcome_msg.message = update.message.text.split(' ', 1)[1]
-            Session.add(welcome_msg)
-            Session.commit()
-            send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
+        
+        group = update_group(update.message.chat)
+        welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
+        if welcome_msg is None:
+            welcome_msg = WelcomeMsg(chat_id=group.id, message=update.message.text.split(' ', 1)[1])
+        else:
+            welcome_msg.message = update.message.text.split(' ', 1)[1]
+        Session.add(welcome_msg)
+        Session.commit()
+        send_async(bot, chat_id=update.message.chat.id, text='The welcome text is set.')
 
 
 def enable_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        if update.message.chat.type in ['group'] or ['supergroup']:
-            group = update_group(update.message.chat)
-            group.welcome_enabled = True
-            Session.add(group)
-            Session.commit()
-            send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
+        
+        group = update_group(update.message.chat)
+        group.welcome_enabled = True
+        Session.add(group)
+        Session.commit()
+        send_async(bot, chat_id=update.message.chat.id, text='Welcome enabled')
 
 
 def disable_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        if update.message.chat.type in ['group'] or ['supergroup']:
-            group = update_group(update.message.chat)
-            group.welcome_enabled = False
-            Session.add(group)
-            Session.commit()
-            send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
+        
+        group = update_group(update.message.chat)
+        group.welcome_enabled = False
+        Session.add(group)
+        Session.commit()
+        send_async(bot, chat_id=update.message.chat.id, text='Welcome disabled')
 
         
 def show_welcome(bot: Bot, update: Update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        if update.message.chat.type in ['group'] or ['supergroup']:
-            group = update_group(update.message.chat)
-            welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
-            if welcome_msg is None:
-                welcome_msg = WelcomeMsg(chat_id=group.id, message='Hi, %username%!')
-                Session.add(welcome_msg)
-                Session.commit()
+        
+        group = update_group(update.message.chat)
+        welcome_msg = Session.query(WelcomeMsg).filter_by(chat_id=group.id).first()
+        if welcome_msg is None:
+            welcome_msg = WelcomeMsg(chat_id=group.id, message='Hi, %username%!')
+            Session.add(welcome_msg)
+            Session.commit()
                       
-            send_async(bot, chat_id=group.id, text=welcome_msg.message)
+        send_async(bot, chat_id=group.id, text=welcome_msg.message)
 
 
 
