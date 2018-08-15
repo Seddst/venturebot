@@ -426,7 +426,7 @@ def error(self, update, error):
 
 def kick(bot, update):
     if update.message.from_user.id in get_admin_ids(bot, update.message.chat_id):
-        bot.leave_chat(update.message.chat.id)
+        bot.kick_chat_member(update.message.chat.id)
 
         
 @run_async
