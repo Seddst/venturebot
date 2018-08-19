@@ -21,8 +21,8 @@ from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageT
 from decorator import get_admin_ids
 from config import TOKEN
 from utils import send_async, update_group
-from telegram import (Bot, Message, ParseMode, Update, Audio, Document, Voice, Sticker, 
-Contact, Video, VideoNote, Location, ChatPhoto, InputTextMessageContent)
+from telegram import Bot, Message, ParseMode, Update, Audio, Document, Voice, Sticker, 
+Contact, Video, VideoNote, Location, ChatPhoto, InputTextMessageContent
 from telegram.ext.dispatcher import run_async
 
 
