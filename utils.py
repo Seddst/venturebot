@@ -1,7 +1,7 @@
 from telegram import Bot
 from telegram.error import TelegramError
 from telegram.ext.dispatcher import run_async
-from typing import Session, Group
+from Dbtables import Session, Group
 
 Session()
 
