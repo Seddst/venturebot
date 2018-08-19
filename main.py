@@ -17,7 +17,7 @@ from datetime import datetime
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters
 import logging
 from json import loads
-from typing import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, check_admin, Session
+from Dbtables import User, Admin, Ban, WelcomeMsg, LocalTrigger, Trigger, MessageType, AdminType, check_admin, Session
 from decorator import get_admin_ids
 from config import TOKEN
 from utils import send_async, update_group
