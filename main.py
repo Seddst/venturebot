@@ -143,14 +143,14 @@ def list_triggers(bot, update):
     send_async(bot, chat_id=update.message.chat.id, text=msg, parse_mode=ParseMode.HTML)
 
 
-def add_trigger_db(Message, trigger_text: str):
+def add_trigger_db(message: Message, trigger_text: str):
     
     trigger = Session.query(Trigger).filter_by(trigger=trigger_text).first()
     if trigger is None:
         trigger = Trigger()
         trigger.trigger = trigger_text
         
-    if Message.audio:
+    if message.audio:
         trigger.message = msg.audio.file_id
         trigger.message_type = MessageType.AUDIO.value
     elif msg.document:
